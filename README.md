@@ -30,7 +30,7 @@ Where the arguments are defined as:
 
 ### Input File
 
-#### Notes
+## Notes
 - This is only part 1
 - A simulation made by a4tasks may have up to `NRES TYPES = 10` resource types and `TASKS = 25` tasks
 - Each string (a task or a resource type name) has at most 32 characters
