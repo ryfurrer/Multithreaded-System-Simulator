@@ -46,9 +46,9 @@ available units of this resource type, respectively.
 ```text
 task taskName busyTime idleTime name1:value1 name2:value2 ...
 ```
-specifies a task in the system. The line has the following fields:
-– `task`: a keyword that specifies a task line
-– `taskName`: the task’s name
+specifies a task in the system. The line has the following fields:  
+– `task`: a keyword that specifies a task line  
+– `taskName`: the task’s name  
 
 ## Notes
 - This is only part 1
