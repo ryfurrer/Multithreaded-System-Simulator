@@ -29,6 +29,26 @@ Where the arguments are defined as:
     before the simulator finishes.
 
 ### Input File
+The simulator reads the system parameters from an input file. The file has a number of lines
+formatted as follows:  
+- A line can be empty
+- A line that starts with a ’#’ is a comment line
+- A line of the form
+
+```text
+resources name1:value1 name2:value2 ...
+```
+specifies the resource types available in the system. The line starts with the keyword resources,
+followed by one, or more, name:value pairs of a resource type name, and the number of
+available units of this resource type, respectively.
+
+- A line of the form
+```text
+task taskName busyTime idleTime name1:value1 name2:value2 ...
+```
+specifies a task in the system. The line has the following fields:
+– `task`: a keyword that specifies a task line
+– `taskName`: the task’s name
 
 ## Notes
 - This is only part 1
