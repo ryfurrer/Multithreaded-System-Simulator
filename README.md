@@ -2,7 +2,7 @@
 
 ## Description
 
-A program required to be developed in C/C++, called a4tasks, that utilizes pthreads to simulate the concurrent execution of a set of tasks. The system has a number of resource types, and each resource type has a number of available units. All resource units in the system are non-sharable non-preemptable resources.
+A program required to be developed in C/C++, called a4tasks, that utilizes `pthreads` to simulate the concurrent execution of a set of tasks. The system has a number of resource types, and each resource type has a number of available units. All resource units in the system are non-sharable non-preemptable resources.
 
 ## Usage
 To compile a4tasks with make in bash run:
@@ -29,7 +29,7 @@ Where the arguments are defined as:
 The simulator reads the system parameters from an input file. The file has a number of lines
 formatted as follows:  
 A line can be empty  
-A line that starts with a ’#’ is a comment line  
+A line that starts with a `#` is a comment line  
 A line of the form:  
 
 ```text
@@ -45,9 +45,22 @@ specifies a task in the system. The line has the following fields:
 * `task`: a keyword that specifies a task line  
 * `taskName`: the task’s name  
 
+#### Example Input File 
+```text
+# An instance of the Dining Philosophers Problem with 5 people
+#
+resources A:1 B:1 C:1 D:1 E:1
+task t1 50 100 A:1 B:1
+task t2 50 100 B:1 C:1
+task t3 50 100 C:1 D:1
+task t4 50 100 D:1 E:1
+task t5 50 100 E:1 A:1
+```
+
 ## Notes
 - This is only part 1
 - A simulation made by a4tasks may have up to `NRES TYPES = 10` resource types and `TASKS = 25` tasks
 - Each string (a task or a resource type name) has at most 32 characters
 - Each white space between fields is composed of one, or more, space character(s)
 - There is no white space around the `:` field separator
+
