@@ -1,0 +1,43 @@
+language: cpp
+os: linux
+
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-7
+
+
+stages:
+- test
+
+
+before_script:
+- export CC=g++-7
+
+
+jobs:
+  allow_failures:
+  - script:
+    - cpplint src/*
+  include:
+  - stage: test
+    name: "make"
+    script:
+      - make clean
+      - make
+      - make tar
+  - name: "cppcheck"
+    install:
+      - sudo apt-get install -qq cppcheck
+    script:
+      - cppcheck --error-exitcode=1 .
+  - name: "lint"
+    language: python
+    python: 3.6
+    install:
+      - pip3 install cpplint
+    script:
+      - cpplint src/*
