@@ -1,4 +1,4 @@
-# Multithreaded-System-Simulator
+# Multithreaded-System-Simulator [![Build Status](https://travis-ci.com/ryfurrer/Multithreaded-System-Simulator.svg?branch=master)](https://travis-ci.com/ryfurrer/Multithreaded-System-Simulator)
 
 ## Description
 
