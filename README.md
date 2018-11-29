@@ -5,7 +5,7 @@
 A program required to be developed in C/C++, called a4tasks, that utilizes pthreads to simulate the concurrent execution of a set of tasks. The system has a number of resource types, and each resource type has a number of available units. All resource units in the system are non-sharable non-preemptable resources.
 
 ## Usage
-To compile a4tasks with make:
+To compile a4tasks with make in bash run:
 ```bash
 make
 ```
