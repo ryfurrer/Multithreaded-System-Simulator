@@ -41,4 +41,6 @@ tar:
 	gzip $(target).tar
 
 clean:
-	rm *~ out.* *.o *.out -f
+	rm $(BUILDDIR) -rf
+	rm $(BINARY) -f
+	rm $(target).tar.gz -f
