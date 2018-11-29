@@ -58,9 +58,9 @@ task t5 50 100 E:1 A:1
 ```
 
 ## Notes
-- This is only part 1
 - A simulation made by a4tasks may have up to `NRES TYPES = 10` resource types and `TASKS = 25` tasks
 - Each string (a task or a resource type name) has at most 32 characters
 - Each white space between fields is composed of one, or more, space character(s)
 - There is no white space around the `:` field separator
+- This is only the first draft of a two version Assignment
 
