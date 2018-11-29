@@ -1,11 +1,8 @@
-# 379-Multithreaded-System-Simulator
+# Multithreaded-System-Simulator
 
 ## Description
 
-a C/C++ program, called a4tasks, that utilizes
-pthreads to simulate the concurrent execution of a set of tasks. The system has a number of
-resource types, and each resource type has a number of available units. All resource units in the
-system are non-sharable non-preemptable resources.
+A program required to be developed in C/C++, called a4tasks, that utilizes pthreads to simulate the concurrent execution of a set of tasks. The system has a number of resource types, and each resource type has a number of available units. All resource units in the system are non-sharable non-preemptable resources.
 
 ## Usage
 To compile a4tasks with make:
@@ -31,24 +28,22 @@ Where the arguments are defined as:
 ### Input File
 The simulator reads the system parameters from an input file. The file has a number of lines
 formatted as follows:  
-- A line can be empty
-- A line that starts with a ’#’ is a comment line
-- A line of the form
+A line can be empty  
+A line that starts with a ’#’ is a comment line  
+A line of the form:  
 
 ```text
 resources name1:value1 name2:value2 ...
 ```
-specifies the resource types available in the system. The line starts with the keyword resources,
-followed by one, or more, name:value pairs of a resource type name, and the number of
-available units of this resource type, respectively.
+specifies the resource types available in the system. The line starts with the keyword resources, followed by one, or more, name:value pairs of a resource type name, and the number of available units of this resource type, respectively.
 
-- A line of the form
+A line of the form
 ```text
 task taskName busyTime idleTime name1:value1 name2:value2 ...
 ```
 specifies a task in the system. The line has the following fields:  
-– `task`: a keyword that specifies a task line  
-– `taskName`: the task’s name  
+* `task`: a keyword that specifies a task line  
+* `taskName`: the task’s name  
 
 ## Notes
 - This is only part 1
