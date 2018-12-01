@@ -1,8 +1,20 @@
-#include <stdio.h> /* printf */
-#include <cstring> /* string compare */
-#include <signal.h>
-#include <stdlib.h>     /* atoi */
 
+#include "parsers.h"
+#include "taskManager.h"
+
+/**
+ *  Main entry point for a4tasks.
+ *
+ * @param argc
+ * @param argv
+ * @return {@code int} Exit Status
+ */
 int main(int argc, char *argv[]) {
-    return EXIT_FAILURE;
+    int status = validateArgs(argc, argv);
+
+    if (!status) {
+        return start(parseArgs(argc, argv));
+    }
+
+    return status;
 }
