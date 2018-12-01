@@ -1,6 +1,10 @@
 
 #include "parsers.h"
 #include "task.h"
+#include "util.h"
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 clock_t START = 0;
 clock_t END;
