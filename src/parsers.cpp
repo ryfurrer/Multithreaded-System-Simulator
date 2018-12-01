@@ -1,6 +1,6 @@
 #include "parsers.h"
 
-uint validateArgs(uint argc, char *argv[]) {
+int validateArgs(int argc, char *argv[]) {
     if (argc != 4) {
         return EINVAL;
     }
@@ -8,7 +8,7 @@ uint validateArgs(uint argc, char *argv[]) {
     return 0;
 }
 
-CLI_ARGS parseArgs(uint argc, char *argv[]) {
+CLI_ARGS parseArgs(int argc, char *argv[]) {
     CLI_ARGS args;
     args.inputFile = argv[1];
     args.monitorTime = (atoi(argv[2]));

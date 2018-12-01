@@ -52,9 +52,9 @@ typedef struct {
     LINE line;
 } FRAME;
 
-uint validateArgs(uint argc, char *argv[]);
+int validateArgs(int argc, char *argv[]);
 
-CLI_ARGS parseArgs(uint argc, char *argv[]);
+CLI_ARGS parseArgs(int argc, char *argv[]);
 
 uint parseTaskID(const string &taskIDString);
 
