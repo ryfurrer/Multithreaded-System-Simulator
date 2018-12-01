@@ -12,7 +12,7 @@ void printMonitor() {
  * Prints to screen the status of tasks (WAITING, RUNNING, IDLE) every `interval` milliseconds
  * @return
  */
-void monitorThread(int interval) {
+void monitorThread(uint interval) {
     //delay
     //lock
     printMonitor();
@@ -36,7 +36,7 @@ void releaseResources(TASK* task) {
 }
 
 
-void runTask(int iterations, TASK* task) {
+void runTask(uint iterations, TASK* task) {
 
 }
 

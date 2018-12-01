@@ -1,6 +1,6 @@
 #include "parsers.h"
 
-int validateArgs(int argc, char *argv[]) {
+uint validateArgs(uint argc, char *argv[]) {
     if (argc != 4) {
         return EINVAL;
     }
@@ -8,7 +8,7 @@ int validateArgs(int argc, char *argv[]) {
     return 0;
 }
 
-CLI_ARGS parseArgs(int argc, char *argv[]) {
+CLI_ARGS parseArgs(uint argc, char *argv[]) {
     CLI_ARGS args;
     args.inputFile = argv[1];
     args.monitorTime = (atoi(argv[2]));
@@ -17,7 +17,7 @@ CLI_ARGS parseArgs(int argc, char *argv[]) {
 }
 
 uint parseTaskID(const string &taskIDString) {
-
+    return 0;
 }
 
 LINE_TYPES getInputFileType(const string &line);

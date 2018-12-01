@@ -19,13 +19,13 @@ typedef enum {INVALID_LINE, COMMENT_LINE, RESOURCE_LINE, TASK_LINE} LINE_TYPES;
 
 typedef struct {
     string inputFile;
-    int monitorTime;
-    int iterations;
+    uint monitorTime;
+    uint iterations;
 } CLI_ARGS;
 
 typedef struct {
     string name;
-    vector<int> value;
+    vector<uint> value;
 } ResourceArg;
 
 typedef struct {
@@ -36,8 +36,8 @@ typedef struct {
 typedef struct {
     string flag;
     uint taskID;
-    int busy;
-    int idle;
+    uint busy;
+    uint idle;
     vector<ResourceArg> resources;
 } TaskLine;
 
@@ -52,9 +52,9 @@ typedef struct {
     LINE line;
 } FRAME;
 
-int validateArgs(int argc, char *argv[]);
+uint validateArgs(uint argc, char *argv[]);
 
-CLI_ARGS parseArgs(int argc, char *argv[]);
+CLI_ARGS parseArgs(uint argc, char *argv[]);
 
 uint parseTaskID(const string &taskIDString);
 

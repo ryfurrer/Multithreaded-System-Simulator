@@ -6,11 +6,11 @@
 using std::string;
 
 typedef struct {
-    int taskIDNum;
+    uint taskIDNum;
     string taskIDString;
     pthread_t tid;
     uint iterNum;
-    int time;
+    uint time;
 } TASK;
 
 #endif

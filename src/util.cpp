@@ -16,7 +16,7 @@
  * Delays a thread by `delay` milliseconds
  * @param milliseconds
  */
-void delay(int delay) {
+void delay(uint delay) {
 }
 
 /**
