@@ -7,8 +7,8 @@ int validateArgs(int argc, char *argv[]) {
         return EINVAL;
     }
 
-    monitorTime = atoi(argv[2]);
-    iterations = atoi(argv[3]);
+    int monitorTime = atoi(argv[2]);
+    int iterations = atoi(argv[3]);
 
     if (!(monitorTime >= 0)) {
         printf("monitorTime invalid\n");
