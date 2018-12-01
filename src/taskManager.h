@@ -6,6 +6,10 @@
 #define MULTITHREADED_SYSTEM_SIMULATOR_TASKMANAGER_H
 
 #include "parsers.h"
+// GLOBAL VARS
+extern pthread_mutex_t threadMutex;
+extern pthread_mutex_t iterationMutex;
+extern pthread_mutex_t monitorMutex;
 
 int start(CLI_ARGS args);
 

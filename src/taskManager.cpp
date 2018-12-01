@@ -10,7 +10,12 @@
 
 clock_t START = 0;
 clock_t END;
-struct tms tmsstart, tmsend;
+
+tms tmsstart, tmsend;
+// GLOBAL VARS
+pthread_mutex_t threadMutex;
+pthread_mutex_t iterationMutex;
+pthread_mutex_t monitorMutex;
 
 float getTime() {
 
