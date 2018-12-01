@@ -1,6 +1,13 @@
 #include "parsers.h"
 #include "util.h"
 
+/**
+ * Checks for proper command line arguments and returns 0 on valid
+ * args or an errno code
+ * @param argc
+ * @param argv
+ * @return status
+ */
 int validateArgs(int argc, char *argv[]) {
     if (argc != 4) {
         printf("Invalid number of arguments.\n");
@@ -10,18 +17,18 @@ int validateArgs(int argc, char *argv[]) {
     int monitorTime = atoi(argv[2]);
     int iterations = atoi(argv[3]);
 
-    if (!(monitorTime >= 0)) {
+    if (monitorTime < 0) {
         printf("monitorTime invalid\n");
         return EINVAL;
-    } else if (!(monitorTime < 99999999)) {
+    } else if (monitorTime > 100000) {
         printf("monitorTime invalid\n");
         return EOVERFLOW;
     }
 
-    if (!(iterations >= 0)) {
+    if (iterations < 0) {
         printf("NITER invalid\n");
         return EINVAL;
-    } else if (!(iterations < 99999999)) {
+    } else if (iterations > 100000) {
         printf("NITER invalid\n");
         return EOVERFLOW;
     }
@@ -29,6 +36,12 @@ int validateArgs(int argc, char *argv[]) {
     return 0;
 }
 
+/**
+ * Converts args into their types and returns them in a struct
+ * @param argc
+ * @param argv
+ * @return {@code CLI_ARGS} args
+ */
 CLI_ARGS parseArgs(int argc, char *argv[]) {
     CLI_ARGS args;
     args.inputFile = argv[1];
@@ -36,6 +49,7 @@ CLI_ARGS parseArgs(int argc, char *argv[]) {
     args.iterations = (atoi(argv[3]));
     return args;
 }
+
 
 uint parseTaskID(const string &taskIDString) {
     return 0;
