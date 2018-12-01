@@ -68,4 +68,6 @@ ResourcesLine parseResourcesLine(const string &line);
 
 TaskLine parseTaskLine(const string &line);
 
+void readInputFile(const string &inputFile);
+
 #endif

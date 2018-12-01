@@ -1,9 +1,29 @@
 #include "parsers.h"
+#include "util.h"
 
 int validateArgs(int argc, char *argv[]) {
     if (argc != 4) {
         printf("Invalid number of arguments.\n");
         return EINVAL;
+    }
+
+    monitorTime = atoi(argv[2]);
+    iterations = atoi(argv[3]);
+
+    if (!(monitorTime >= 0)) {
+        printf("monitorTime invalid\n");
+        return EINVAL;
+    } else if (!(monitorTime < 99999999)) {
+        printf("monitorTime invalid\n");
+        return EOVERFLOW;
+    }
+
+    if (!(iterations >= 0)) {
+        printf("NITER invalid\n");
+        return EINVAL;
+    } else if (!(iterations < 99999999)) {
+        printf("NITER invalid\n");
+        return EOVERFLOW;
     }
 
     return 0;
@@ -30,3 +50,7 @@ ResourceArg parseResourceArg(const string &arg);
 ResourcesLine parseResourcesLine(const string &line);
 
 TaskLine parseTaskLine(const string &line);
+
+void readInputFile(const string &inputFile) {
+
+}

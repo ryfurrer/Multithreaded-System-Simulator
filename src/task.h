@@ -5,12 +5,19 @@
 
 using std::string;
 
+typedef enum {WAIT, RUN, IDLE} STATUS;
+
 typedef struct {
-    uint taskIDNum;
-    string taskIDString;
-    pthread_t tid;
-    uint iterNum;
-    uint time;
+    char name[100];
+    int busyTime;
+    int idleTime;
+    long totalBusyTime;
+    long totalIdleTime;
+    long totalWaitTime;
+    vector<string> reqResources;
+    bool assigned;
+    int timesExecuted;
+    STATUS status;
 } TASK;
 
 #endif
