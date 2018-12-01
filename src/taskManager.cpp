@@ -87,11 +87,11 @@ void createTaskThreads(){
 }
 
 void do_pthread_join_with_error_check(int index){
-    int rval = pthread_join(nullptr, NULL);
-    if (rval) {
-        fprintf(stderr, "\n** pthread_join: %s\n", strerror(rval));
-        exit(EXIT_FAILURE);
-    }
+//    int rval = pthread_join(nullptr, NULL);
+//    if (rval) {
+//        fprintf(stderr, "\n** pthread_join: %s\n", strerror(rval));
+//        exit(EXIT_FAILURE);
+//    }
 }
 
 void waitForTaskThreads(){
