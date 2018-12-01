@@ -2,7 +2,7 @@
 
 int validateArgs(int argc, char *argv[]) {
     if (argc != 4) {
-        printf("Invalid number of arguments.");
+        printf("Invalid number of arguments.\n");
         return EINVAL;
     }
 
