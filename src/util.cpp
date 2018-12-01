@@ -14,13 +14,13 @@
 
 /**
  * Delays a thread by `delay` milliseconds
- * @param milliseconds
+ * @param delay
  */
 void delay(uint delay) {
     //from lab experiments on eClass
     struct timespec interval;
-    interval.tv_sec = (long) milliseconds / 1000;
-    interval.tv_nsec = (long) ((milliseconds % 1000) * 1000000);
+    interval.tv_sec = (long) delay / 1000;
+    interval.tv_nsec = (long) ((delay % 1000) * 1000000);
     if (nanosleep(&interval, NULL) < 0)
         printf("warning: delay: %s\n", strerror(errno));
 }
