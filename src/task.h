@@ -1,42 +1,16 @@
 
 #ifndef TASK_H
 #define TASK_H
-#include <chrono>
 #include <string>
 
-#include "sysThread.h"
-
-
-using std::chrono::milliseconds;
 using std::string;
 
-
-class Task: public SysThread {
-public:
-    explicit Task(uint taskID);
-
-    uint getTaskIDNum() const;
-
-    string getTaskIDString() const;
-
-    pthread_t getTID();
-
-    uint getIterNum();
-
-    milliseconds getTime();
-
-    void completePrint();
-
-private:
-    uint taskIDNum;
-
+typedef struct {
+    int taskIDNum;
     string taskIDString;
-
     pthread_t tid;
-
     uint iterNum;
-
-    milliseconds time;
-};
+    int time;
+} Task;
 
 #endif

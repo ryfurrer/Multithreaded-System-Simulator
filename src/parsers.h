@@ -14,9 +14,14 @@
 
 using std::string;
 using std::vector;
-using std::chrono::milliseconds;
 
 typedef enum {INVALID_LINE, COMMENT_LINE, RESOURCE_LINE, TASK_LINE} LINE_TYPES;
+
+typedef struct {
+    string inputFile;
+    int monitorTime;
+    int iterations;
+} CLI_ARGS;
 
 typedef struct {
     string name;
@@ -31,8 +36,8 @@ typedef struct {
 typedef struct {
     string flag;
     uint taskID;
-    milliseconds busy;
-    milliseconds idle;
+    int busy;
+    int idle;
     vector<ResourceArg> resources;
 } TaskLine;
 
@@ -48,6 +53,8 @@ typedef struct {
 } FRAME;
 
 int validateArgs(int argc, char *argv[]);
+
+CLI_ARGS parseArgs(int argc, char *argv[]);
 
 uint parseTaskID(const string &taskIDString);
 
