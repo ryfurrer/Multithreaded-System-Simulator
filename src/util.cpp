@@ -16,7 +16,7 @@
  * Delays a thread by `delay` milliseconds
  * @param delay
  */
-void delay(uint delay) {
+void delay(int delay) {
     //from lab experiments on eClass
     struct timespec interval;
     interval.tv_sec = (long) delay / 1000;
