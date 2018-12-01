@@ -11,6 +11,6 @@ typedef struct {
     pthread_t tid;
     uint iterNum;
     int time;
-} Task;
+} TASK;
 
 #endif

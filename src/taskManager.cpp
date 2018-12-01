@@ -1,5 +1,6 @@
 
-
+#include "parsers.h"
+#include "task.h"
 
 /**
  * Prints to screen the status of tasks (WAITING, RUNNING, IDLE)
@@ -14,7 +15,7 @@ void printMonitor() {
 void monitorThread(int interval) {
     //delay
     //lock
-    printMonitor()
+    printMonitor();
     //unlock
 }
 
