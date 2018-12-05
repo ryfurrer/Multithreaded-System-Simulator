@@ -138,6 +138,7 @@ void parseTaskLine(const string &line) {
 
 LINE_TYPES getInputFileLineType(const string &line) {
     char cline[100];
+    char* flag;
     if (line[0] == '#' || line[0] == '\r' || line[0] == '\n') {
         return COMMENT_LINE;
     }
