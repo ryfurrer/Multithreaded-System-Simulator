@@ -79,20 +79,18 @@ void *monitorThread(long monitorTime) {
  * @param task
  * @return
  */
-bool checkResources(TASK *task) {
+bool checkResources(TASK *task) {//todo
     return false;
 }
 
-void procureResources(TASK *task) {
+void procureResources(TASK *task) {//todo
 }
 
-void releaseResources(TASK *task) {
-
+void releaseResources(TASK *task) {//todo
 }
 
 
-void runTask(uint iterations, TASK *task) {
-
+void runTask(uint iterations, TASK *task) {//todo
 }
 
 std::string getFormattedSystemResourceInfo() {
@@ -128,7 +126,6 @@ std::string getFormattedSystemTaskInfo() {
         systemTasks.append(buffer);
         sprintf(buffer, "\t (tid= %lu)\n", threads[i]);
         systemTasks.append(buffer);
-        // print the required resources
         for (auto &reqResource : taskList.at(i).reqResources) {
             char *resourceName;
             int resourcesNeeded;
@@ -177,38 +174,44 @@ void *task_start_routine(long arg) {
     pthread_exit(nullptr);
 }
 
-void do_pthread_create_with_error_check(void *(*f)(long)) {
-//    mutex_lock();
-    int rval = 0;
-//    int rval = pthread_create();
+/**
+ * Before returning, a successful call to pthread_create() stores the ID of the new thread in the
+ * buffer pointed to by thread; this identifier is used to refer to the thread in subsequent calls
+ * to other pthreads functions.
+ * @param f
+ */
+void do_pthread_create_with_error_check(void *(*start_function)(long), long arg) {
+    pthread_t threadID;
+    int rval = pthread_create(threadID, NULL, start_function, arg);
+    //attr is NULL, so the thread is created with default attributes.
     if (rval) {
         fprintf(stderr, "pthread_create: %s\n", strerror(rval));
         exit(1);
     }
 }
 
-void createMonitorThread() {
-    do_pthread_create_with_error_check(&monitorThread);
+void createMonitorThread(long time) {
+    do_pthread_create_with_error_check(&monitorThread, time);
 }
 
 void createTaskThreads() {
-    for (unsigned int i = 0; i < taskList.size(); i++) {
+    for (unsigned long i = 0; i < taskList.size(); i++) {
         mutex_lock(&threadMutex);
-        do_pthread_create_with_error_check(task_start_routine);
+        do_pthread_create_with_error_check(task_start_routine, i);
     }
 }
 
 void do_pthread_join_with_error_check(int index) {
-//    int rval = pthread_join(nullptr, NULL);
-//    if (rval) {
-//        fprintf(stderr, "\n** pthread_join: %s\n", strerror(rval));
-//        exit(EXIT_FAILURE);
-//    }
+    int rval = pthread_join(threads[index], NULL);
+    if (rval) {
+        fprintf(stderr, "\n** pthread_join: %s\n", strerror(rval));
+        exit(EXIT_FAILURE);
+    }
 }
 
-void doTaskThreads() {
+void waitForTaskTermination() {
     for (unsigned int i = 0; i < taskList.size(); i++) {
-//        do_pthread_join_with_error_check
+        do_pthread_join_with_error_check(i);
     }
 }
 
@@ -221,22 +224,21 @@ int start(CLI_ARGS args) {
     printf("Reading File...\n");
     readInputFile(args.inputFile);
 
-    printf("Doing mutex stuff...\n");
+    printf("Initializing Mutexes...\n");
     mutex_init(&threadMutex);
     mutex_init(&iterationMutex);
     mutex_init(&monitorMutex);
 
     printf("Creating monitor thread...\n");
-
-    createMonitorThread();
+    createMonitorThread(args.monitorTime);
     printf("Creating task threads...\n");
     createTaskThreads();
-    delay(400);
+    delay(400); //delay long enough for threads array to be initialized
 
-    printf("Doing tasks...\n");
-    doTaskThreads();
+    printf("Waiting in tasks...\n");
+    waitForTaskTermination();
 
-    printf("Threads Finished...\nTerminating...\n");
+    printf("Tasks Finished...\n");
     printTerminationInfo();
     return EXIT_SUCCESS;
 }

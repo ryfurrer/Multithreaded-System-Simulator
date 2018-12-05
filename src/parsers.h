@@ -21,7 +21,7 @@ typedef enum {INVALID_LINE, COMMENT_LINE, RESOURCE_LINE, TASK_LINE} LINE_TYPES;
 
 typedef struct {
     string inputFile;
-    uint monitorTime;
+    long monitorTime;
     uint iterations;
 } CLI_ARGS;
 
