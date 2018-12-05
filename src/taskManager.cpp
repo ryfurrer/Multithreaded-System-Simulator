@@ -111,15 +111,20 @@ void waitForTaskThreads(){
 }
 
 int start(CLI_ARGS args) {
+    prinf("Reading File...\n");
     readInputFile(args.inputFile);
 
+    prinf("Doing mutex stuff...\n");
     mutex_init(&threadMutex);
     mutex_init(&iterationMutex);
     mutex_init(&monitorMutex);
 
-    createMonitorThread();
+    prinf("Creating monitor thread...\n");
 
+    createMonitorThread();
     delay(400);
+
+    prinf("Doing tasks...\n");
 
     waitForTaskThreads();
 
