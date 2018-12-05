@@ -29,6 +29,11 @@ jobs:
       - make clean
       - make
       - make tar
+    name: "tests"
+    script:
+      - make clean
+      - make
+      - ./a4tasks test/t1.txt 75 20
   - name: "cppcheck"
     install:
       - sudo apt-get install -qq cppcheck
