@@ -156,7 +156,6 @@ LINE_TYPES getInputFileLineType(const string &line) {
     istringstream iss(line);
     vector<string> items((istream_iterator<string>(iss)), istream_iterator<string>());
     flag = items.at(0).c_str();
-    printf("%s\n", flag);
     if (strcmp(flag, RESOURCE_FLAG) == 0) {
         return RESOURCE_LINE;
     }
