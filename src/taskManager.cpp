@@ -15,11 +15,12 @@
 
 // GLOBAL VARS
 std::map<std::string, int> resourceMap;
-std::vector<TASK> taskList;
+std::vector <TASK> taskList;
 //GLOBAL VARS END
 
 clock_t START = 0;
 clock_t END;
+long _CLK_TCK = 0;
 
 tms tmsstart, tmsend;
 
@@ -29,9 +30,8 @@ pthread_mutex_t monitorMutex;
 pthread_t threads[NTASKS];
 
 float getTime() {
-
     END = times(&tmsend);
-    return (END - START);
+    return (END - START) / (_CLK_TCK * 1000);
 }
 
 /**
@@ -65,8 +65,7 @@ void printMonitor() {
  * Prints to screen the status of tasks (WAITING, RUNNING, IDLE) every `interval` milliseconds
  * @return
  */
-void *monitorThread(void *arg) {
-    long monitorTime = (long)arg;
+void *monitorThread(long monitorTime) {
     while (true) {
         delay(monitorTime);
         mutex_lock(&monitorMutex);
@@ -80,19 +79,19 @@ void *monitorThread(void *arg) {
  * @param task
  * @return
  */
-bool checkResources(TASK* task) {
+bool checkResources(TASK *task) {
     return false;
 }
 
-void procureResources(TASK* task) {
+void procureResources(TASK *task) {
 }
 
-void releaseResources(TASK* task) {
+void releaseResources(TASK *task) {
 
 }
 
 
-void runTask(uint iterations, TASK* task) {
+void runTask(uint iterations, TASK *task) {
 
 }
 
@@ -101,7 +100,8 @@ std::string getFormattedSystemResourceInfo() {
     std::string systemResources;
     for (itr = resourceMap.begin(); itr != resourceMap.end(); itr++) {
         char buffer[RESOURCE_MAX_LEN];
-        int val = sprintf(buffer, "\t%s: (maxAvail=   %s, held=   0) \n", (itr->first).c_str(), resourceMap[itr->first]);
+        int val = sprintf(buffer, "\t%s: (maxAvail=   %i, held=   0) \n", (itr->first).c_str(),
+                          resourceMap[itr->first]);
         if (!val) {
             printf("Failed to print term info");
             exit(EXIT_FAILURE);
@@ -113,8 +113,7 @@ std::string getFormattedSystemResourceInfo() {
 
 std::string getFormattedSystemTaskInfo() {
     std::string systemTasks;
-    for (int i = 0; i < taskList.size(); i++)
-    {
+    for (unsigned int i = 0; i < taskList.size(); i++) {
         char buffer[1024];
         char status[20];
         if (taskList.at(i).status == IDLE) {
@@ -125,20 +124,24 @@ std::string getFormattedSystemTaskInfo() {
             strcpy(status, RUN_FLAG);
         }
         sprintf(buffer, "[%d] %s (%s, runTime= %lu msec, idleTime= %lu msec):\n", i, taskList.at(i).name, status,
-               taskList.at(i).totalBusyTime, taskList.at(i).totalIdleTime);
-        sprintf(buffer, "\t (tid= %lu\n", threads[i]);
+                taskList.at(i).totalBusyTime, taskList.at(i).totalIdleTime);
+        systemTasks.append(buffer);
+        sprintf(buffer, "\t (tid= %lu)\n", threads[i]);
+        systemTasks.append(buffer);
         // print the required resources
         for (auto &reqResource : taskList.at(i).reqResources) {
-            char* resourceName;
+            char *resourceName;
             int resourcesNeeded;
             char resourceString[50];
             strcpy(resourceString, reqResource.c_str());
             resourceName = strtok(resourceString, ":");
             resourcesNeeded = atoi(strtok(nullptr, ":"));
 
-            sprintf(buffer, "\t %s: (needed=\t%d, held= 0)\n", resourceName, resourcesNeeded );
+            sprintf(buffer, "\t %s: (needed=\t%d, held= 0)\n", resourceName, resourcesNeeded);
+            systemTasks.append(buffer);
         }
-        sprintf(buffer, "\t (RUN: %d times, WAIT: %lu msec\n\n", taskList.at(i).timesExecuted, taskList.at(i).totalWaitTime);
+        sprintf(buffer, "\t (RUN: %d times, WAIT: %lu msec)\n\n", taskList.at(i).timesExecuted,
+                taskList.at(i).totalWaitTime);
         systemTasks.append(buffer);
     }
     return systemTasks;
@@ -154,15 +157,15 @@ void printTerminationInfo() {
            "\n"
            "\n"
            "System Tasks: \n%s"
-           "Running time= %.0f msec", systemResources.c_str(), systemTasks.c_str(), getTime());
+           "Running time= %.0f msec\n", systemResources.c_str(), systemTasks.c_str(), getTime());
 }
 
-void runIterations(TASK* task) {
+void runIterations(TASK *task) {
     //TODO
 }
 
-void *task_start_routine(void *arg) {
-    threads[(long)arg] = pthread_self();
+void *task_start_routine(long arg) {
+    threads[arg] = pthread_self();
     for (auto &task : taskList) {
         if (task.assigned) {
             continue;
@@ -174,9 +177,9 @@ void *task_start_routine(void *arg) {
     pthread_exit(nullptr);
 }
 
-void do_pthread_create_with_error_check(void* (*)(void*) start_routine)){
+void do_pthread_create_with_error_check(void *(*f)(long)) {
 //    mutex_lock();
-    int rval = 1;
+    int rval = 0;
 //    int rval = pthread_create();
     if (rval) {
         fprintf(stderr, "pthread_create: %s\n", strerror(rval));
@@ -184,18 +187,18 @@ void do_pthread_create_with_error_check(void* (*)(void*) start_routine)){
     }
 }
 
-void createMonitorThread(){
+void createMonitorThread() {
     do_pthread_create_with_error_check(&monitorThread);
 }
 
-void createTaskThreads(){
-    for (long i = 0; i <taskList.size(); i++) {
+void createTaskThreads() {
+    for (unsigned int i = 0; i < taskList.size(); i++) {
         mutex_lock(&threadMutex);
         do_pthread_create_with_error_check(task_start_routine);
     }
 }
 
-void do_pthread_join_with_error_check(int index){
+void do_pthread_join_with_error_check(int index) {
 //    int rval = pthread_join(nullptr, NULL);
 //    if (rval) {
 //        fprintf(stderr, "\n** pthread_join: %s\n", strerror(rval));
@@ -203,13 +206,18 @@ void do_pthread_join_with_error_check(int index){
 //    }
 }
 
-void doTaskThreads(){
-    for (long i = 0; i < taskList.size(); i++) {
+void doTaskThreads() {
+    for (unsigned int i = 0; i < taskList.size(); i++) {
 //        do_pthread_join_with_error_check
     }
 }
 
 int start(CLI_ARGS args) {
+    if ((_CLK_TCK = sysconf(_SC_CLK_TCK)) < 0) {
+        printf("_SC_CLK_TCK is zero.\n");
+        exit(-1);
+    }
+
     printf("Reading File...\n");
     readInputFile(args.inputFile);
 
