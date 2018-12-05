@@ -1,6 +1,7 @@
 #include "parsers.h"
 #include "util.h"
 #include "task.h"
+#include "taskManager.h"
 #include <cstring>
 #include <iostream>
 
@@ -66,7 +67,7 @@ void parseResourceArg(const string &arg) {
     char nameValuePair[RESOURCE_MAX_LEN];
     int number;
 
-    strcpy(nameValuePair, arg);
+    strcpy(nameValuePair, arg.c_str());
 
     string name(strtok(nameValuePair, ":"));
     number = atoi(strtok(nullptr, ":"));
@@ -127,7 +128,7 @@ void parseTaskLine(const string &line) {
     while (token != nullptr){
         string str(token);
         newTask.reqResources.push_back(str);
-        flag = strtok(nullptr, " ");
+        token = strtok(nullptr, " ");
     }
 
     //add to task list
@@ -173,7 +174,7 @@ void parseInputFileLine(const string &line) {
 void readInputFile(const string &inputFile) {
     string line; //line read from file
 
-    ifstream file(taskFilePath);
+    ifstream file(inputFile);
     if (file.fail()) {
         printf("FILE DOES NOT EXIST\n");
         exit(EXIT_FAILURE);
