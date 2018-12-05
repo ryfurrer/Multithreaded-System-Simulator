@@ -5,6 +5,7 @@
 #include "util.h"
 #include <stdio.h>
 #include <string.h>
+#include <vector>
 #include <time.h>
 #include <sys/times.h>
 
@@ -96,6 +97,7 @@ void runTask(uint iterations, TASK* task) {
 }
 
 std::string getFormattedSystemResourceInfo() {
+    map<string, int>::iterator itr;
     std::string systemResources;
     for (itr = resourceMap.begin(); itr != resourceMap.end(); itr++) {
         char buffer[RESOURCE_MAX_LEN];
