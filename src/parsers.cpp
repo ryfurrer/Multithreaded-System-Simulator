@@ -147,7 +147,6 @@ void parseTaskLine(const string &line) {
 }
 
 LINE_TYPES getInputFileLineType(const string &line) {
-    char cline[100];
     const char* flag;
     if (!line.length() || line[0] == '#' || line[0] == '\r' || line[0] == '\n') {
         return COMMENT_LINE;
@@ -157,7 +156,7 @@ LINE_TYPES getInputFileLineType(const string &line) {
     istringstream iss(line);
     vector<string> items((istream_iterator<string>(iss)), istream_iterator<string>());
     flag = items.at(0).c_str();
-    printf(flag);
+    printf(flag.c_str());
     if (strcmp(flag, RESOURCE_FLAG) == 0) {
         return RESOURCE_LINE;
     }
