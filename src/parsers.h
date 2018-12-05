@@ -54,6 +54,10 @@ typedef struct {
     LINE line;
 } FRAME;
 
+std::string getFormattedSystemResourceInfo();
+
+std::string getFormattedSystemTaskInfo();
+
 int validateArgs(int argc, char *argv[]);
 
 CLI_ARGS parseArgs(int argc, char *argv[]);

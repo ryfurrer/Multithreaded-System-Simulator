@@ -64,6 +64,57 @@ CLI_ARGS parseArgs(int argc, char *argv[]) {
     return args;
 }
 
+std::string getFormattedSystemResourceInfo() {
+    std::map<string, int>::iterator itr;
+    std::string systemResources;
+    for (itr = resourceMap.begin(); itr != resourceMap.end(); itr++) {
+        char buffer[RESOURCE_MAX_LEN];
+        int val = sprintf(buffer, "\t%s: (maxAvail=   %i, held=   0) \n", (itr->first).c_str(),
+                          resourceMap[itr->first]);
+        if (!val) {
+            printf("Failed to print term info");
+            exit(EXIT_FAILURE);
+        }
+        systemResources.append(buffer);
+    }
+    return systemResources;
+}
+
+std::string getFormattedSystemTaskInfo() {
+    std::string systemTasks;
+    for (unsigned int i = 0; i < taskList.size(); i++) {
+        char buffer[1024];
+        char status[20];
+        if (taskList.at(i).status == IDLE) {
+            strcpy(status, IDLE_FLAG);
+        } else if (taskList.at(i).status == WAIT) {
+            strcpy(status, WAIT_FLAG);
+        } else {
+            strcpy(status, RUN_FLAG);
+        }
+        sprintf(buffer, "[%d] %s (%s, runTime= %lu msec, idleTime= %lu msec):\n", i, taskList.at(i).name, status,
+                taskList.at(i).totalBusyTime, taskList.at(i).totalIdleTime);
+        systemTasks.append(buffer);
+        sprintf(buffer, "\t (tid= %lu)\n", threads[i]);
+        systemTasks.append(buffer);
+        for (auto &reqResource : taskList.at(i).reqResources) {
+            char *resourceName;
+            int resourcesNeeded;
+            char resourceString[50];
+            strcpy(resourceString, reqResource.c_str());
+            resourceName = strtok(resourceString, ":");
+            resourcesNeeded = atoi(strtok(nullptr, ":"));
+
+            sprintf(buffer, "\t %s: (needed=\t%d, held= 0)\n", resourceName, resourcesNeeded);
+            systemTasks.append(buffer);
+        }
+        sprintf(buffer, "\t (RUN: %d times, WAIT: %lu msec)\n\n", taskList.at(i).timesExecuted,
+                taskList.at(i).totalWaitTime);
+        systemTasks.append(buffer);
+    }
+    return systemTasks;
+}
+
 /**
  * Adds resource to the map
  * @param arg
