@@ -1,5 +1,8 @@
 #include "parsers.h"
 #include "util.h"
+#include "task.h"
+#include <cstring>
+#include <iostream>
 
 /**
  * Checks for proper command line arguments and returns 0 on valid
@@ -121,8 +124,8 @@ void parseTaskLine(const string &line) {
     // Resource requirements
     token = strtok(nullptr, " ");
     newTask.assigned = false;
-    while (flag != nullptr){
-        string str(flag);
+    while (token != nullptr){
+        string str(token);
         newTask.reqResources.push_back(str);
         flag = strtok(nullptr, " ");
     }
@@ -140,8 +143,8 @@ LINE_TYPES getInputFileLineType(const string &line) {
     //determine what the leading keyword is (i.e. the input file line flag)
     strcpy(cline, line.c_str());
     flag = strtok(cline, " ");
-    if ((strcmp(flag, RESOURCES_FLAG) == 0) {
-        return RESOURCE_LINE;
+    if ((strcmp(flag, RESOURCE_FLAG) == 0) {
+        return LINE_TYPES.RESOURCE_LINE;
     }
     if ((strcmp(flag, TASK_FLAG) == 0) {
         return TASK_LINE;
@@ -151,7 +154,7 @@ LINE_TYPES getInputFileLineType(const string &line) {
 }
 
 void parseInputFileLine(const string &line) {
-    switch(getInputFileLineType()) {
+    switch(getInputFileLineType(line)) {
         case TASK_LINE:
             parseTaskLine(line);
             break;
