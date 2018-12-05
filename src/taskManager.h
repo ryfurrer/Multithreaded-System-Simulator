@@ -6,6 +6,7 @@
 #define MULTITHREADED_SYSTEM_SIMULATOR_TASKMANAGER_H
 
 #include "parsers.h"
+#include "task.h"
 #include <map>
 #include <string>
 // GLOBAL VARS
