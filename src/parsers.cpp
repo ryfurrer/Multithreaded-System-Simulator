@@ -146,8 +146,9 @@ LINE_TYPES getInputFileLineType(const string &line) {
     }
 
     //determine what the leading keyword is (i.e. the input file line flag)
-    strcpy(cline, line.c_str());
-    flag = strtok(cline, " ");
+    istringstream iss(line);
+    vector<string> items((istream_iterator<string>(iss)), istream_iterator<string>());
+    flag = items.at(0).c_str();
     printf(flag);
     if (strcmp(flag, RESOURCE_FLAG) == 0) {
         return RESOURCE_LINE;
