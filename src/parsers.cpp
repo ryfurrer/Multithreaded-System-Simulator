@@ -148,10 +148,10 @@ LINE_TYPES getInputFileLineType(const string &line) {
     //determine what the leading keyword is (i.e. the input file line flag)
     strcpy(cline, line.c_str());
     flag = strtok(cline, " ");
-    if ((strcmp(flag, RESOURCE_FLAG) == 0) {
+    if (strcmp(flag, RESOURCE_FLAG) == 0) {
         return LINE_TYPES.RESOURCE_LINE;
     }
-    if ((strcmp(flag, TASK_FLAG) == 0) {
+    if (strcmp(flag, TASK_FLAG) == 0) {
         return TASK_LINE;
     }
 
