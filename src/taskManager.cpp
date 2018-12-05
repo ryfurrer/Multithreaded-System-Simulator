@@ -97,7 +97,7 @@ void runTask(uint iterations, TASK* task) {
 }
 
 std::string getFormattedSystemResourceInfo() {
-    map<string, int>::iterator itr;
+    std::map<string, int>::iterator itr;
     std::string systemResources;
     for (itr = resourceMap.begin(); itr != resourceMap.end(); itr++) {
         char buffer[RESOURCE_MAX_LEN];
@@ -174,7 +174,7 @@ void *task_start_routine(void *arg) {
     pthread_exit(nullptr);
 }
 
-void do_pthread_create_with_error_check(void *(*start_routine)){
+void do_pthread_create_with_error_check(void* (*)(void*) start_routine)){
 //    mutex_lock();
     int rval = 1;
 //    int rval = pthread_create();
