@@ -10,6 +10,7 @@
 #define RESOURCE_FLAG "resources"
 #define TASK_FLAG "task"
 #define COMMENT_FLAG "#"
+#define RESOURCE_MAX_LEN 32
 
 
 using std::string;
@@ -55,18 +56,6 @@ typedef struct {
 int validateArgs(int argc, char *argv[]);
 
 CLI_ARGS parseArgs(int argc, char *argv[]);
-
-uint parseTaskID(const string &taskIDString);
-
-LINE_TYPES getInputFileType(const string &line);
-
-FRAME parseInputFileLine(const string &line);
-
-ResourceArg parseResourceArg(const string &arg);
-
-ResourcesLine parseResourcesLine(const string &line);
-
-TaskLine parseTaskLine(const string &line);
 
 void readInputFile(const string &inputFile);
 

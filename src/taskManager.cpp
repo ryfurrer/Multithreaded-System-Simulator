@@ -8,11 +8,16 @@
 #include <time.h>
 #include <sys/times.h>
 
+// GLOBAL VARS
+std::map<std::string, int> resourceMap;
+std::vector<TASK> taskList;
+//GLOBAL VARS END
+
 clock_t START = 0;
 clock_t END;
 
 tms tmsstart, tmsend;
-// GLOBAL VARS
+
 pthread_mutex_t threadMutex;
 pthread_mutex_t iterationMutex;
 pthread_mutex_t monitorMutex;
