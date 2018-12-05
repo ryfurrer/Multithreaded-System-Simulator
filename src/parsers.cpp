@@ -167,7 +167,7 @@ void parseInputFileLine(const string &line) {
             //ignore any comments or white lines
             break;
         default : // INVALID_LINE
-            printf("ERROR: UNKNOWN KEYWORD FROM FILE: %s\n", flag);
+            printf("ERROR: INVALID LINE: %s\n", line);
             exit(EINVAL);
     }
 }
