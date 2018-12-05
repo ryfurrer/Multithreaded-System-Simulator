@@ -161,12 +161,15 @@ LINE_TYPES getInputFileLineType(const string &line) {
 void parseInputFileLine(const string &line) {
     switch(getInputFileLineType(line)) {
         case TASK_LINE:
+            printf("Parsing task...\n");
             parseTaskLine(line);
             break;
         case RESOURCE_LINE:
+            printf("Parsing resources...\n");
             parseResourcesLine(line);
             break;
         case COMMENT_LINE:
+            printf("Ignoring blank/comment line...\n");
             //ignore any comments or white lines
             break;
         default : // INVALID_LINE
@@ -185,6 +188,7 @@ void readInputFile(const string &inputFile) {
     }
 
     if (file.good()) {
+        printf("File good...\n");
         while (getline(file, line)) {
             parseInputFileLine(line);
         }
