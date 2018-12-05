@@ -25,6 +25,7 @@ tms tmsstart, tmsend;
 pthread_mutex_t threadMutex;
 pthread_mutex_t iterationMutex;
 pthread_mutex_t monitorMutex;
+pthread_t threads[NTASKS];
 
 float getTime() {
 
@@ -123,7 +124,7 @@ std::string getFormattedSystemTaskInfo() {
         }
         sprintf(buffer, "[%d] %s (%s, runTime= %lu msec, idleTime= %lu msec):\n", i, taskList.at(i).name, status,
                taskList.at(i).totalBusyTime, taskList.at(i).totalIdleTime);
-        sprintf(buffer, "\t (tid= %lu\n", TID[i]);
+        sprintf(buffer, "\t (tid= %lu\n", threads[i]);
         // print the required resources
         for (auto &reqResource : taskList.at(i).reqResources) {
             char* resourceName;
@@ -159,7 +160,7 @@ void runIterations(TASK* task) {
 }
 
 void *task_start_routine(void *arg) {
-    TID[(long)arg] = pthread_self();
+    threads[(long)arg] = pthread_self();
     for (auto &task : taskList) {
         if (task.assigned) {
             continue;
@@ -219,7 +220,7 @@ int start(CLI_ARGS args) {
 
     createMonitorThread();
     printf("Creating task threads...\n");
-    createTaskThreads()
+    createTaskThreads();
     delay(400);
 
     printf("Doing tasks...\n");
