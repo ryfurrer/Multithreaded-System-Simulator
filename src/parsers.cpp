@@ -13,7 +13,6 @@
 #include <string.h>
 
 
-
 using namespace std;
 
 /**
@@ -63,11 +62,6 @@ CLI_ARGS parseArgs(int argc, char *argv[]) {
     args.monitorTime = (atoi(argv[2]));
     args.iterations = (atoi(argv[3]));
     return args;
-}
-
-
-uint parseTaskID(const string &taskIDString) {
-    return 0;
 }
 
 /**
