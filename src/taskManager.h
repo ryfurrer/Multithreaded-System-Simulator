@@ -6,10 +6,17 @@
 #define MULTITHREADED_SYSTEM_SIMULATOR_TASKMANAGER_H
 
 #include "parsers.h"
+#include "task.h"
+#include <map>
+#include <string>
 // GLOBAL VARS
-extern pthread_mutex_t threadMutex;
-extern pthread_mutex_t iterationMutex;
-extern pthread_mutex_t monitorMutex;
+extern std::map<std::string, int> resourceMap;
+extern std::vector<TASK> taskList;
+//GLOBAL VARS END
+
+//extern pthread_mutex_t threadMutex;
+//extern pthread_mutex_t iterationMutex;
+//extern pthread_mutex_t monitorMutex;
 
 int start(CLI_ARGS args);
 

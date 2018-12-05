@@ -1,5 +1,20 @@
 #include "parsers.h"
 #include "util.h"
+#include "task.h"
+#include "taskManager.h"
+#include <cstring>
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
+#include <string.h>
+
+
+
+using namespace std;
 
 /**
  * Checks for proper command line arguments and returns 0 on valid
@@ -55,16 +70,135 @@ uint parseTaskID(const string &taskIDString) {
     return 0;
 }
 
-LINE_TYPES getInputFileType(const string &line);
+/**
+ * Adds resource to the map
+ * @param arg
+ */
+void parseResourceArg(const string &arg) {
+    char nameValuePair[RESOURCE_MAX_LEN];
+    int number;
 
-FRAME parseInputFileLine(const string &line);
+    strcpy(nameValuePair, arg.c_str());
 
-ResourceArg parseResourceArg(const string &arg);
+    string name(strtok(nameValuePair, ":"));
+    number = atoi(strtok(nullptr, ":"));
 
-ResourcesLine parseResourcesLine(const string &line);
+    resourceMap[name] = number;
+}
 
-TaskLine parseTaskLine(const string &line);
+/**
+ * Convert a resources line into a map of resource
+ * @param line
+ */
+void parseResourcesLine(const string &line) {
+    char* temp;
+    char cline[100];
+    strcpy(cline, line.c_str());
+    vector<char*> resourceStrings;
+
+    //go to first name:value pair
+    temp = strtok(cline, " ");
+    temp = strtok(nullptr, " ");
+    //iterate through the rest
+    while (temp != nullptr) {
+        resourceStrings.push_back(temp);
+        temp = strtok(nullptr, " ");
+    }
+
+    for (auto &resourceString : resourceStrings) {
+        parseResourceArg(resourceString);
+    }
+}
+
+/**
+ * converts a task line to an item on the task list
+ * @param line
+ */
+void parseTaskLine(const string &line) {
+    char* token;
+    char cline[100];
+    strcpy(cline, line.c_str());
+    TASK newTask;
+    newTask.status = IDLE;
+    newTask.totalIdleTime = 0;
+    newTask.totalBusyTime = 0;
+    newTask.totalWaitTime = 0;
+    newTask.timesExecuted = 0;
+
+    token = strtok(cline, " "); //flag
+    token = strtok(nullptr, " "); //id
+    strcpy(newTask.name, token);
+    token = strtok(nullptr, " "); //busy
+    newTask.busyTime = atoi(token);
+    token = strtok(nullptr, " "); //idle
+    newTask.idleTime = atoi(token);
+
+    // Resource requirements
+    token = strtok(nullptr, " ");
+    newTask.assigned = false;
+    while (token != nullptr){
+        string str(token);
+        newTask.reqResources.push_back(str);
+        token = strtok(nullptr, " ");
+    }
+
+    //add to task list
+    taskList.push_back(newTask);
+}
+
+LINE_TYPES getInputFileLineType(const string &line) {
+    const char* flag;
+    if (!line.length() || line[0] == '#' || line[0] == '\r' || line[0] == '\n') {
+        return COMMENT_LINE;
+    }
+
+    //determine what the leading keyword is (i.e. the input file line flag)
+    istringstream iss(line);
+    vector<string> items((istream_iterator<string>(iss)), istream_iterator<string>());
+    flag = items.at(0).c_str();
+    if (strcmp(flag, RESOURCE_FLAG) == 0) {
+        return RESOURCE_LINE;
+    }
+    if (strcmp(flag, TASK_FLAG) == 0) {
+        return TASK_LINE;
+    }
+
+    return INVALID_LINE;
+}
+
+void parseInputFileLine(const string &line) {
+    switch(getInputFileLineType(line)) {
+        case TASK_LINE:
+            printf("Parsing task...\n");
+            parseTaskLine(line);
+            break;
+        case RESOURCE_LINE:
+            printf("Parsing resources...\n");
+            parseResourcesLine(line);
+            break;
+        case COMMENT_LINE:
+            printf("Ignoring blank/comment line...\n");
+            //ignore any comments or white lines
+            break;
+        default : // INVALID_LINE
+            printf("ERROR: INVALID LINE: %s\n", line.c_str());
+            exit(EINVAL);
+    }
+}
 
 void readInputFile(const string &inputFile) {
+    string line; //line read from file
 
+    ifstream file(inputFile);
+    if (file.fail()) {
+        printf("FILE DOES NOT EXIST\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (file.good()) {
+        printf("File good...\n");
+        while (getline(file, line)) {
+            parseInputFileLine(line);
+        }
+    }
 }
