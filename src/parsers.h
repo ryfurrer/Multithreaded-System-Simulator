@@ -6,6 +6,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <errno.h>
 
 #define RESOURCE_FLAG "resources"
 #define TASK_FLAG "task"

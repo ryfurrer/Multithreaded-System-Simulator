@@ -149,7 +149,7 @@ LINE_TYPES getInputFileLineType(const string &line) {
     strcpy(cline, line.c_str());
     flag = strtok(cline, " ");
     if (strcmp(flag, RESOURCE_FLAG) == 0) {
-        return LINE_TYPES.RESOURCE_LINE;
+        return RESOURCE_LINE;
     }
     if (strcmp(flag, TASK_FLAG) == 0) {
         return TASK_LINE;
