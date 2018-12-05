@@ -144,17 +144,8 @@ std::string getFormattedSystemTaskInfo() {
 void printTerminationInfo() {
     std::string systemResources;
     std::string systemTasks;
-    systemResources.append(
-            "\tA: (maxAvail=   2, held=   0) \n"
-            "\tB: (maxAvail=   2, held=   0) \n"
-            "\tC: (maxAvail=   2, held=   0) \n"
-            "\tD: (maxAvail=   2, held=   0) \n");
-    systemTasks.append("[0] t1 (IDLE, runTime= 50 msec, idleTime= 100 msec):\n"
-                       "\t(tid= 140327817283328)\n"
-                       "\tA: (needed=   1, held=   0) \n"
-                       "\tB: (needed=   1, held=   0) \n"
-                       "\t(RUN: 20 times, WAIT: 0 msec)\n"
-                       "\n");
+    systemResources = getFormattedSystemResourceInfo();
+    systemTasks = getFormattedSystemTaskInfo();
 
     printf("System Resources:\n%s"
            "\n"
