@@ -6,6 +6,8 @@
 #include <iostream>
 #include <fstream>
 
+using namespace std;
+
 /**
  * Checks for proper command line arguments and returns 0 on valid
  * args or an errno code
@@ -168,7 +170,7 @@ void parseInputFileLine(const string &line) {
             //ignore any comments or white lines
             break;
         default : // INVALID_LINE
-            printf("ERROR: INVALID LINE: %s\n", line);
+            printf("ERROR: INVALID LINE: %s\n", line.c_str());
             exit(EINVAL);
     }
 }
