@@ -6,6 +6,7 @@
 #define MULTITHREADED_SYSTEM_SIMULATOR_TASKMANAGER_H
 
 #include "parsers.h"
+#include <string>
 // GLOBAL VARS
 extern std::map<std::string, int> resourceMap;
 extern std::vector<TASK> taskList;
