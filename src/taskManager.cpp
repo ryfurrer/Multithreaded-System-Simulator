@@ -1,5 +1,6 @@
 
 #include "parsers.h"
+#include "taskManager.h"
 #include "task.h"
 #include "util.h"
 #include <stdio.h>
