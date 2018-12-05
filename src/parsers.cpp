@@ -4,6 +4,7 @@
 #include "taskManager.h"
 #include <cstring>
 #include <iostream>
+#include <fstream>
 
 /**
  * Checks for proper command line arguments and returns 0 on valid
