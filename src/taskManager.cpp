@@ -59,7 +59,7 @@ void printMonitor() {
  * @return
  */
 void *monitorThread(void *arg) {
-    long monitorTime = (long) arg;
+    auto monitorTime = (long) arg;
     while (true) {
         delay(monitorTime);
         mutex_lock(&monitorMutex);
@@ -209,7 +209,6 @@ void *task_start_routine(void *arg) {
 //        printf("%s\n", task.name);
         task.assigned = true;
         mutex_unlock(&threadMutex);
-        printf("%s\n", "Thread unlocked");
         runTask(&task);
         break;
     }
