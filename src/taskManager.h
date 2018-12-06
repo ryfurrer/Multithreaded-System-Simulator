@@ -12,6 +12,7 @@
 // GLOBAL VARS
 extern std::map<std::string, int> resourceMap;
 extern std::vector<TASK> taskList;
+extern pthread_t threads[NTASKS];
 //GLOBAL VARS END
 
 int start(CLI_ARGS args);

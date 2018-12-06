@@ -9,13 +9,10 @@
 #include <time.h>
 #include <sys/times.h>
 
-#define RUN_FLAG "RUN"
-#define IDLE_FLAG "IDLE"
-#define WAIT_FLAG "WAIT"
-
 // GLOBAL VARS
 std::map<std::string, int> resourceMap;
 std::vector <TASK> taskList;
+pthread_t threads[NTASKS];
 //GLOBAL VARS END
 
 clock_t START = 0;
@@ -27,7 +24,6 @@ tms tmsstart, tmsend;
 pthread_mutex_t threadMutex;
 pthread_mutex_t iterationMutex;
 pthread_mutex_t monitorMutex;
-pthread_t threads[NTASKS];
 
 float getTime() {
     END = times(&tmsend);
@@ -65,7 +61,8 @@ void printMonitor() {
  * Prints to screen the status of tasks (WAITING, RUNNING, IDLE) every `interval` milliseconds
  * @return
  */
-void *monitorThread(long monitorTime) {
+void *monitorThread(void* arg) {
+    long monitorTime = (long) arg;
     while (true) {
         delay(monitorTime);
         mutex_lock(&monitorMutex);
@@ -110,8 +107,8 @@ void runIterations(TASK *task) {
     //TODO
 }
 
-void *task_start_routine(long arg) {
-    threads[arg] = pthread_self();
+void *task_start_routine(void* arg) {
+    threads[(long)arg] = pthread_self();
     for (auto &task : taskList) {
         if (task.assigned) {
             continue;
@@ -129,9 +126,9 @@ void *task_start_routine(long arg) {
  * to other pthreads functions.
  * @param f
  */
-void do_pthread_create_with_error_check(void *(*start_function)(long), long arg) {
+void do_pthread_create_with_error_check(void *(*start_function)(void *), void* arg) {
     pthread_t threadID;
-    int rval = pthread_create(threadID, NULL, start_function, arg);
+    int rval = pthread_create(&threadID, NULL, start_function, arg);
     //attr is NULL, so the thread is created with default attributes.
     if (rval) {
         fprintf(stderr, "pthread_create: %s\n", strerror(rval));
@@ -140,13 +137,13 @@ void do_pthread_create_with_error_check(void *(*start_function)(long), long arg)
 }
 
 void createMonitorThread(long time) {
-    do_pthread_create_with_error_check(&monitorThread, time);
+    do_pthread_create_with_error_check(&monitorThread, (void*) time);
 }
 
 void createTaskThreads() {
     for (unsigned long i = 0; i < taskList.size(); i++) {
         mutex_lock(&threadMutex);
-        do_pthread_create_with_error_check(task_start_routine, i);
+        do_pthread_create_with_error_check(task_start_routine, (void*) i);
     }
 }
 

@@ -11,6 +11,11 @@
 #define RESOURCE_FLAG "resources"
 #define TASK_FLAG "task"
 #define COMMENT_FLAG "#"
+
+#define RUN_FLAG "RUN"
+#define IDLE_FLAG "IDLE"
+#define WAIT_FLAG "WAIT"
+
 #define RESOURCE_MAX_LEN 32
 
 

@@ -3,6 +3,9 @@
 #define TASK_H
 #include <string>
 
+#define NTASKS 25
+#define NRES_TYPES 10
+
 using std::string;
 
 typedef enum {WAIT, RUN, IDLE} STATUS;
