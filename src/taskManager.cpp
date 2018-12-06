@@ -125,7 +125,7 @@ void waitForResources(TASK *task) { // todo - fix does not work correctly
     switchStatus(task, WAIT);
     bool resAvailable = false;
     while (!resAvailable) {
-        mutex_lock(&resourceMapMutex); s
+        mutex_lock(&resourceMapMutex);
         resAvailable = checkResourcesAvailable(task);
         if (!resAvailable) {
             mutex_unlock(&resourceMapMutex);
@@ -175,7 +175,7 @@ void procureResources(TASK *task) {
  * Adds the resources used by a task to the resource map
  */
 void releaseResources(TASK *task) {
-    mutex_lock(&resourceMapMutex); s
+    mutex_lock(&resourceMapMutex);
     adjustResources(task, add);
     mutex_unlock(&resourceMapMutex);
 }
