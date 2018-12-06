@@ -86,6 +86,7 @@ bool checkResourcesAvailable(TASK *task) {
 
         char *resName = strtok_r(resource, ":", &saveptr);
         int resNumber = atoi(strtok_r(nullptr, ":", &saveptr));
+        printf("Need %i, %i avail\n", resNumber, resourceMap[resName]);
 
         if (resourceMap[resName] < resNumber) {
             printf("\n\nNo resource %s", resName);
@@ -146,13 +147,13 @@ void adjustResources(TASK *task, int (*operation)(int, int)) {
 
 void procureResources(TASK *task) {
     mutex_lock(&iterationMutex); // resourceMap needs to be consistent across threads
-    adjustResources(task, add);
+    adjustResources(task, sub);
     mutex_unlock(&iterationMutex);
 }
 
 void releaseResources(TASK *task) {
     mutex_lock(&iterationMutex); // resourceMap needs to be consistent across threads
-    adjustResources(task, sub);
+    adjustResources(task, add);
     mutex_unlock(&iterationMutex);
 }
 
