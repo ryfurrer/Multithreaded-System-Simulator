@@ -61,7 +61,7 @@ void printMonitor() {
  * Prints to screen the status of tasks (WAITING, RUNNING, IDLE) every `interval` milliseconds
  * @return
  */
-void *monitorThread(void* arg) {
+void *monitorThread(void *arg) {
     long monitorTime = (long) arg;
     while (true) {
         delay(monitorTime);
@@ -107,8 +107,8 @@ void runIterations(TASK *task) {
     //TODO
 }
 
-void *task_start_routine(void* arg) {
-    threads[(long)arg] = pthread_self();
+void *task_start_routine(void *arg) {
+    threads[(long) arg] = pthread_self();
     for (auto &task : taskList) {
         if (task.assigned) {
             continue;
@@ -120,44 +120,20 @@ void *task_start_routine(void* arg) {
     pthread_exit(nullptr);
 }
 
-/**
- * Before returning, a successful call to pthread_create() stores the ID of the new thread in the
- * buffer pointed to by thread; this identifier is used to refer to the thread in subsequent calls
- * to other pthreads functions.
- * @param f
- */
-void do_pthread_create_with_error_check(void *(*start_function)(void *), void* arg) {
-    pthread_t threadID;
-    int rval = pthread_create(&threadID, NULL, start_function, arg);
-    //attr is NULL, so the thread is created with default attributes.
-    if (rval) {
-        fprintf(stderr, "pthread_create: %s\n", strerror(rval));
-        exit(1);
-    }
-}
-
 void createMonitorThread(long time) {
-    do_pthread_create_with_error_check(&monitorThread, (void*) time);
+    do_pthread_create_with_error_check(&monitorThread, (void *) time);
 }
 
 void createTaskThreads() {
     for (unsigned long i = 0; i < taskList.size(); i++) {
         mutex_lock(&threadMutex);
-        do_pthread_create_with_error_check(task_start_routine, (void*) i);
-    }
-}
-
-void do_pthread_join_with_error_check(int index) {
-    int rval = pthread_join(threads[index], NULL);
-    if (rval) {
-        fprintf(stderr, "\n** pthread_join: %s\n", strerror(rval));
-        exit(EXIT_FAILURE);
+        do_pthread_create_with_error_check(task_start_routine, (void *) i);
     }
 }
 
 void waitForTaskTermination() {
     for (unsigned int i = 0; i < taskList.size(); i++) {
-        do_pthread_join_with_error_check(i);
+        do_pthread_join_with_error_check(&threads[i]);
     }
 }
 

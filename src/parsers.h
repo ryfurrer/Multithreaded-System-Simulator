@@ -22,42 +22,15 @@
 using std::string;
 using std::vector;
 
-typedef enum {INVALID_LINE, COMMENT_LINE, RESOURCE_LINE, TASK_LINE} LINE_TYPES;
+typedef enum {
+    INVALID_LINE, COMMENT_LINE, RESOURCE_LINE, TASK_LINE
+} LINE_TYPES;
 
 typedef struct {
     string inputFile;
     long monitorTime;
     uint iterations;
 } CLI_ARGS;
-
-typedef struct {
-    string name;
-    vector<uint> value;
-} ResourceArg;
-
-typedef struct {
-    string flag;
-    vector<ResourceArg> resources;
-} ResourcesLine;
-
-typedef struct {
-    string flag;
-    uint taskID;
-    uint busy;
-    uint idle;
-    vector<ResourceArg> resources;
-} TaskLine;
-
-typedef union {
-    ResourceArg resourceArg;
-    ResourcesLine resourcesLine;
-    TaskLine taskLine;
-} LINE;
-
-typedef struct {
-    LINE_TYPES type;
-    LINE line;
-} FRAME;
 
 std::string getFormattedSystemResourceInfo();
 

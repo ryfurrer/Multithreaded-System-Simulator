@@ -141,11 +141,11 @@ void parseResourceArg(const string &arg) {
  * @param line
  */
 void parseResourcesLine(const string &line) {
-    char* temp;
+    char *temp;
     char *saveptr;
     char cline[100];
     strcpy(cline, line.c_str());
-    vector<char*> resourceStrings;
+    vector<char *> resourceStrings;
 
     //go to first name:value pair
     temp = strtok_r(cline, " ", &saveptr);
@@ -167,7 +167,7 @@ void parseResourcesLine(const string &line) {
  */
 void parseTaskLine(const string &line) {
     char *saveptr;
-    char* token;
+    char *token;
     char cline[100];
     strcpy(cline, line.c_str());
     TASK newTask;
@@ -188,7 +188,7 @@ void parseTaskLine(const string &line) {
     // Resource requirements
     token = strtok_r(nullptr, " ", &saveptr);
     newTask.assigned = false;
-    while (token != nullptr){
+    while (token != nullptr) {
         string str(token);
         newTask.reqResources.push_back(str);
         token = strtok_r(nullptr, " ", &saveptr);
@@ -199,14 +199,14 @@ void parseTaskLine(const string &line) {
 }
 
 LINE_TYPES getInputFileLineType(const string &line) {
-    const char* flag;
+    const char *flag;
     if (!line.length() || line[0] == '#' || line[0] == '\r' || line[0] == '\n') {
         return COMMENT_LINE;
     }
 
     //determine what the leading keyword is (i.e. the input file line flag)
     istringstream iss(line);
-    vector<string> items((istream_iterator<string>(iss)), istream_iterator<string>());
+    vector <string> items((istream_iterator<string>(iss)), istream_iterator<string>());
     flag = items.at(0).c_str();
     if (strcmp(flag, RESOURCE_FLAG) == 0) {
         return RESOURCE_LINE;
@@ -219,7 +219,7 @@ LINE_TYPES getInputFileLineType(const string &line) {
 }
 
 void parseInputFileLine(const string &line) {
-    switch(getInputFileLineType(line)) {
+    switch (getInputFileLineType(line)) {
         case TASK_LINE:
             printf("Parsing task...\n");
             parseTaskLine(line);

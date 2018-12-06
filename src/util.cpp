@@ -62,3 +62,27 @@ void mutex_unlock(pthread_mutex_t *mutex) {
         exit(EXIT_FAILURE);
     }
 }
+
+void do_pthread_join_with_error_check(pthread_t* pthread) {
+    int rval = pthread_join(*pthread, NULL);
+    if (rval) {
+        fprintf(stderr, "\n** pthread_join: %s\n", strerror(rval));
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
+ * Before returning, a successful call to pthread_create() stores the ID of the new thread in the
+ * buffer pointed to by thread; this identifier is used to refer to the thread in subsequent calls
+ * to other pthreads functions.
+ * @param f
+ */
+void do_pthread_create_with_error_check(void *(*start_function)(void *), void *arg) {
+    pthread_t threadID;
+    int rval = pthread_create(&threadID, NULL, start_function, arg);
+    //attr is NULL, so the thread is created with default attributes.
+    if (rval) {
+        fprintf(stderr, "pthread_create: %s\n", strerror(rval));
+        exit(1);
+    }
+}
