@@ -92,8 +92,9 @@ std::string getFormattedSystemTaskInfo() {  //TODO: refactor to be clearer
         } else {
             strcpy(status, RUN_FLAG);
         }
-        sprintf(buffer, "[%d] %s (%s, runTime= %lu msec, idleTime= %lu msec):\n", i, taskList.at(i).name, status,
-                taskList.at(i).totalBusyTime, taskList.at(i).totalIdleTime);
+        sprintf(buffer, "[%d] %s (%s, runTime= %i msec, idleTime= %i msec):\n", i,
+                taskList.at(i).name, status,
+                taskList.at(i).busyTime, taskList.at(i).idleTime);
         systemTasks.append(buffer);
         sprintf(buffer, "\t (tid= %lu)\n", threads[i]);
         systemTasks.append(buffer);

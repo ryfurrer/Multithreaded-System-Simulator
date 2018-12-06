@@ -44,6 +44,7 @@ void printMonitor() {
             case RUN:
                 runTasks.append(task.name);
                 runTasks.append(" ");
+                break;
             default:
                 idleTasks.append(task.name);
                 idleTasks.append(" ");
@@ -54,6 +55,8 @@ void printMonitor() {
            runTasks.c_str(), idleTasks.c_str());
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
 /**
  * Prints to screen the status of tasks (WAITING, RUNNING, IDLE) every `interval` milliseconds
  * @return
@@ -67,6 +70,8 @@ void *monitorThread(void *arg) {
         mutex_unlock(&monitorMutex);
     }
 }
+
+#pragma clang diagnostic pop
 
 /**
  * Returns whether all resources for a task are available
@@ -82,9 +87,9 @@ bool checkResourcesAvailable(TASK *task) {
 
         char *resName = strtok_r(resource, ":", &saveptr);
         int resNumber = atoi(strtok_r(nullptr, ":", &saveptr));
+//        printf("Need %i, %i avail\n", resNumber, resourceMap[resName]);
 
         if (resourceMap[resName] < resNumber) {
-            printf("\n\nNo resource %s", resName);
             return false;
         }
     }
@@ -104,14 +109,14 @@ void switchStatus(TASK *task, STATUS status) {
     mutex_unlock(&monitorMutex);
 }
 
-void waitForResources(TASK *task) {
+void waitForResources(TASK *task) { // todo - fix does not work correctly
     switchStatus(task, WAIT);
     bool resAvailable = false;
     while (!resAvailable) {
-        mutex_lock(&iterationMutex);
+        mutex_lock(&iterationMutex); // resourceMap needs to be consistent across threads
         resAvailable = checkResourcesAvailable(task);
+        mutex_unlock(&iterationMutex);
         if (!resAvailable) {
-            mutex_unlock(&iterationMutex);
             delay(20);
         }
     }
@@ -141,11 +146,15 @@ void adjustResources(TASK *task, int (*operation)(int, int)) {
 
 
 void procureResources(TASK *task) {
-    adjustResources(task, add);
+    mutex_lock(&iterationMutex); // resourceMap needs to be consistent across threads
+    adjustResources(task, sub);
+    mutex_unlock(&iterationMutex);
 }
 
 void releaseResources(TASK *task) {
-    adjustResources(task, sub);
+    mutex_lock(&iterationMutex); // resourceMap needs to be consistent across threads
+    adjustResources(task, add);
+    mutex_unlock(&iterationMutex);
 }
 
 
@@ -154,7 +163,6 @@ void runTaskIteration(TASK *task) {
     delay(task->busyTime);
     task->totalBusyTime += task->busyTime;
     releaseResources(task);
-    mutex_unlock(&iterationMutex);
 }
 
 void doTaskIdle(TASK *task) {
@@ -169,10 +177,12 @@ void runTask(TASK *task) { // todo
     uint iterCount = 0;
 
     while (iterCount != ITERATIONS) {
+        switchStatus(task, WAIT);
         iterStart = times(&tmsIterStart);
         waitForResources(task);
         iterWait = times(&tmsIterWait);
-        task->totalWaitTime += (iterWait - iterStart) / _CLK_TCK * 1000;
+//        printf("Waited %li\n", (iterWait - iterStart) * 1000 / _CLK_TCK);
+        task->totalWaitTime += (iterWait - iterStart) * 1000 / _CLK_TCK;
 
         switchStatus(task, RUN);
         runTaskIteration(task);

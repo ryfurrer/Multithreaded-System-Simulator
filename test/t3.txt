@@ -1,0 +1,9 @@
+# Example
+#     ./a4tasks test/t3.txt 75 20
+
+resources  A:2 B:2 C:2 D:2
+task	   t1 100 100  A:2 B:1
+task	   t2 50 100  A:1 C:2
+task	   t3 50 100  A:1 D:1
+task	   t4 50 50  B:2 C:1
+task	   t5 80 100  B:1 D:1
