@@ -1,37 +1,30 @@
-
+//Copyright 2018 Ryan Furrer
 #include "parsers.h"
 #include "taskManager.h"
-#include "task.h"
 #include "util.h"
-#include <stdio.h>
 #include <string.h>
-#include <vector>
-#include <time.h>
 #include <sys/times.h>
-
-#define RUN_FLAG "RUN"
-#define IDLE_FLAG "IDLE"
-#define WAIT_FLAG "WAIT"
 
 // GLOBAL VARS
 std::map<std::string, int> resourceMap;
-std::vector <TASK> taskList;
+std::vector<TASK> taskList;
+pthread_t threads[NTASKS];
 //GLOBAL VARS END
+
+uint ITERATIONS = 0;
 
 clock_t START = 0;
 clock_t END;
 long _CLK_TCK = 0;
 
-tms tmsstart, tmsend;
-
 pthread_mutex_t threadMutex;
 pthread_mutex_t iterationMutex;
 pthread_mutex_t monitorMutex;
-pthread_t threads[NTASKS];
 
 float getTime() {
+    tms tmsend;
     END = times(&tmsend);
-    return (END - START) / (_CLK_TCK * 1000);
+    return (END - START) / (double) _CLK_TCK * 1000;
 }
 
 /**
@@ -57,7 +50,7 @@ void printMonitor() {
         }
     }
 
-    printf("INFO: Monitor: [WAIT] %s\n\t [RUN] %s\n\t [IDLE] %s\n\n", waitTasks.c_str(),
+    printf("Monitor: [WAIT] %s\n\t [RUN] %s\n\t [IDLE] %s\n\n", waitTasks.c_str(),
            runTasks.c_str(), idleTasks.c_str());
 }
 
@@ -65,7 +58,8 @@ void printMonitor() {
  * Prints to screen the status of tasks (WAITING, RUNNING, IDLE) every `interval` milliseconds
  * @return
  */
-void *monitorThread(long monitorTime) {
+void *monitorThread(void *arg) {
+    long monitorTime = (long) arg;
     while (true) {
         delay(monitorTime);
         mutex_lock(&monitorMutex);
@@ -75,76 +69,122 @@ void *monitorThread(long monitorTime) {
 }
 
 /**
- * Checks if all resources for a task are available
- * @param task
- * @return
+ * Returns whether all resources for a task are available
+ * @param task {@code TASK *}
+ * @return {@code bool}
  */
-bool checkResources(TASK *task) {
-    return false;
+bool checkResourcesAvailable(TASK *task) {
+    for (auto &resourceString : task->reqResources) {
+        char *saveptr;
+        char resource[RESOURCE_MAX_LEN];
+
+        strcpy(resource, resourceString.c_str());
+
+        char *resName = strtok_r(resource, ":", &saveptr);
+        int resNumber = atoi(strtok_r(nullptr, ":", &saveptr));
+
+        if (resourceMap[resName] < resNumber) {
+            printf("\n\nNo resource %s", resName);
+            return false;
+        }
+    }
+    return true;
 }
 
+
+/**
+ * Handles switching a task's status with restriction that tasks cannot switch
+ * if the monitor is printing
+ * @param task
+ * @param status
+ */
+void switchStatus(TASK *task, STATUS status) {
+    mutex_lock(&monitorMutex);
+    task->status = status;
+    mutex_unlock(&monitorMutex);
+}
+
+void waitForResources(TASK *task) {
+    switchStatus(task, WAIT);
+    bool resAvailable = false;
+    while (!resAvailable) {
+        mutex_lock(&iterationMutex);
+        resAvailable = checkResourcesAvailable(task);
+        if (!resAvailable) {
+            mutex_unlock(&iterationMutex);
+            delay(20);
+        }
+    }
+}
+
+int add(int a, int b) {
+    return a + b;
+}
+
+int sub(int a, int b) {
+    return a - b;
+}
+
+void adjustResources(TASK *task, int (*operation)(int, int)) {
+    for (auto &resourceString : task->reqResources) {
+        char *saveptr;
+        char resource[RESOURCE_MAX_LEN];
+
+        strcpy(resource, resourceString.c_str());
+        char *resName = strtok_r(resource, ":", &saveptr);
+        int resNumber = atoi(strtok_r(nullptr, ":", &saveptr));
+        int currentValue = resourceMap[resName];
+
+        resourceMap[resName] = operation(currentValue, resNumber);
+    }
+}
+
+
 void procureResources(TASK *task) {
+    adjustResources(task, add);
 }
 
 void releaseResources(TASK *task) {
-
+    adjustResources(task, sub);
 }
 
 
-void runTask(uint iterations, TASK *task) {
-
+void runTaskIteration(TASK *task) {
+    procureResources(task);
+    delay(task->busyTime);
+    task->totalBusyTime += task->busyTime;
+    releaseResources(task);
+    mutex_unlock(&iterationMutex);
 }
 
-std::string getFormattedSystemResourceInfo() {
-    std::map<string, int>::iterator itr;
-    std::string systemResources;
-    for (itr = resourceMap.begin(); itr != resourceMap.end(); itr++) {
-        char buffer[RESOURCE_MAX_LEN];
-        int val = sprintf(buffer, "\t%s: (maxAvail=   %i, held=   0) \n", (itr->first).c_str(),
-                          resourceMap[itr->first]);
-        if (!val) {
-            printf("Failed to print term info");
-            exit(EXIT_FAILURE);
-        }
-        systemResources.append(buffer);
+void doTaskIdle(TASK *task) {
+    delay(task->idleTime);
+    task->totalIdleTime += task->idleTime;
+}
+
+
+void runTask(TASK *task) { // todo
+    clock_t iterStart, iterWait;
+    struct tms tmsIterStart, tmsIterWait;
+    uint iterCount = 0;
+
+    while (iterCount != ITERATIONS) {
+        iterStart = times(&tmsIterStart);
+        waitForResources(task);
+        iterWait = times(&tmsIterWait);
+        task->totalWaitTime += (iterWait - iterStart) / _CLK_TCK * 1000;
+
+        switchStatus(task, RUN);
+        runTaskIteration(task);
+
+        switchStatus(task, IDLE);
+        doTaskIdle(task);
+
+        task->timesExecuted += 1;
+        iterCount++;
+        printf("task: %s (tid= %lu, iter= %d, time= %.0f msec) \n", task->name, pthread_self(),
+               iterCount, getTime());
     }
-    return systemResources;
-}
-
-std::string getFormattedSystemTaskInfo() {
-    std::string systemTasks;
-    for (unsigned int i = 0; i < taskList.size(); i++) {
-        char buffer[1024];
-        char status[20];
-        if (taskList.at(i).status == IDLE) {
-            strcpy(status, IDLE_FLAG);
-        } else if (taskList.at(i).status == WAIT) {
-            strcpy(status, WAIT_FLAG);
-        } else {
-            strcpy(status, RUN_FLAG);
-        }
-        sprintf(buffer, "[%d] %s (%s, runTime= %lu msec, idleTime= %lu msec):\n", i, taskList.at(i).name, status,
-                taskList.at(i).totalBusyTime, taskList.at(i).totalIdleTime);
-        systemTasks.append(buffer);
-        sprintf(buffer, "\t (tid= %lu)\n", threads[i]);
-        systemTasks.append(buffer);
-        // print the required resources
-        for (auto &reqResource : taskList.at(i).reqResources) {
-            char *resourceName;
-            int resourcesNeeded;
-            char resourceString[50];
-            strcpy(resourceString, reqResource.c_str());
-            resourceName = strtok(resourceString, ":");
-            resourcesNeeded = atoi(strtok(nullptr, ":"));
-
-            sprintf(buffer, "\t %s: (needed=\t%d, held= 0)\n", resourceName, resourcesNeeded);
-            systemTasks.append(buffer);
-        }
-        sprintf(buffer, "\t (RUN: %d times, WAIT: %lu msec)\n\n", taskList.at(i).timesExecuted,
-                taskList.at(i).totalWaitTime);
-        systemTasks.append(buffer);
-    }
-    return systemTasks;
 }
 
 void printTerminationInfo() {
@@ -160,83 +200,68 @@ void printTerminationInfo() {
            "Running time= %.0f msec\n", systemResources.c_str(), systemTasks.c_str(), getTime());
 }
 
-void runIterations(TASK *task) {
-    //TODO
-}
-
-void *task_start_routine(long arg) {
-    threads[arg] = pthread_self();
+void *task_start_routine(void *arg) {
+    threads[(long) arg] = pthread_self();
     for (auto &task : taskList) {
         if (task.assigned) {
             continue;
         }
+//        printf("%s\n", task.name);
         task.assigned = true;
         mutex_unlock(&threadMutex);
+        printf("%s\n", "Thread unlocked");
+        runTask(&task);
         break;
     }
     pthread_exit(nullptr);
 }
 
-void do_pthread_create_with_error_check(void *(*f)(long)) {
-//    mutex_lock();
-    int rval = 0;
-//    int rval = pthread_create();
-    if (rval) {
-        fprintf(stderr, "pthread_create: %s\n", strerror(rval));
-        exit(1);
-    }
-}
-
-void createMonitorThread() {
-    do_pthread_create_with_error_check(&monitorThread);
+void createMonitorThread(long time) {
+    do_pthread_create_with_error_check(&monitorThread, (void *) time);
 }
 
 void createTaskThreads() {
-    for (unsigned int i = 0; i < taskList.size(); i++) {
+    for (unsigned long i = 0; i < taskList.size(); i++) {
         mutex_lock(&threadMutex);
-        do_pthread_create_with_error_check(task_start_routine);
+        do_pthread_create_with_error_check(task_start_routine, (void *) i);
     }
 }
 
-void do_pthread_join_with_error_check(int index) {
-//    int rval = pthread_join(nullptr, NULL);
-//    if (rval) {
-//        fprintf(stderr, "\n** pthread_join: %s\n", strerror(rval));
-//        exit(EXIT_FAILURE);
-//    }
-}
-
-void doTaskThreads() {
+void waitForTaskTermination() {
     for (unsigned int i = 0; i < taskList.size(); i++) {
-//        do_pthread_join_with_error_check
+        do_pthread_join_with_error_check(&threads[i]);
     }
 }
 
-int start(CLI_ARGS args) {
+int run(CLI_ARGS args) {
+    tms tmsstart;
+    ITERATIONS = args.iterations;
+
     if ((_CLK_TCK = sysconf(_SC_CLK_TCK)) < 0) {
-        printf("_SC_CLK_TCK is zero.\n");
+        printf("ERROR: getting sysconfig clock tick\n");
         exit(-1);
     }
 
-    printf("Reading File...\n");
+    printf("Trying to read File...\n");
     readInputFile(args.inputFile);
 
-    printf("Doing mutex stuff...\n");
+    START = times(&tmsstart);
+
+    printf("Initializing Mutexes...\n");
     mutex_init(&threadMutex);
     mutex_init(&iterationMutex);
     mutex_init(&monitorMutex);
 
     printf("Creating monitor thread...\n");
-
-    createMonitorThread();
+    createMonitorThread(args.monitorTime);
     printf("Creating task threads...\n");
     createTaskThreads();
-    delay(400);
+    delay(400); //delay long enough for threads array to be initialized
 
-    printf("Doing tasks...\n");
-    doTaskThreads();
+    printf("Waiting on tasks...\n");
+    waitForTaskTermination();
 
-    printf("Threads Finished...\nTerminating...\n");
+    printf("Tasks Finished...\n");
     printTerminationInfo();
     return EXIT_SUCCESS;
 }

@@ -7,7 +7,7 @@
 # ------------------------------------------------------------
 
 CC= g++
-CFLAGS= -std=c++11 -Wall -I. -lpthread
+CFLAGS= -std=c++11 -Wall -I. -pthread
 MKDIR = mkdir
 target=	submit
 

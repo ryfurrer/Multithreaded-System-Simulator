@@ -1,17 +1,16 @@
-#include "parsers.h"
-#include "util.h"
-#include "task.h"
-#include "taskManager.h"
+//Copyright 2018 Ryan Furrer
+
 #include <cstring>
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
-#include <string>
 #include <sstream>
 #include <algorithm>
 #include <iterator>
-#include <string.h>
-
+#include <map>
+#include <stdlib.h>
+#include "parsers.h"
+#include "task.h"
+#include "taskManager.h"
 
 
 using namespace std;
@@ -65,9 +64,56 @@ CLI_ARGS parseArgs(int argc, char *argv[]) {
     return args;
 }
 
+std::string getFormattedSystemResourceInfo() {
+    std::map<string, int>::iterator itr;
+    std::string systemResources;
+    for (itr = resourceMap.begin(); itr != resourceMap.end(); itr++) {
+        char buffer[RESOURCE_MAX_LEN];
+        int val = sprintf(buffer, "\t%s: (maxAvail=   %i, held=   0) \n", (itr->first).c_str(),
+                          resourceMap[itr->first]);
+        if (!val) {
+            printf("Failed to print term info");
+            exit(EXIT_FAILURE);
+        }
+        systemResources.append(buffer);
+    }
+    return systemResources;
+}
 
-uint parseTaskID(const string &taskIDString) {
-    return 0;
+std::string getFormattedSystemTaskInfo() {  //TODO: refactor to be clearer
+    std::string systemTasks;
+    for (unsigned int i = 0; i < taskList.size(); i++) {
+        char buffer[1024];
+        char status[20];
+        if (taskList.at(i).status == IDLE) {
+            strcpy(status, IDLE_FLAG);
+        } else if (taskList.at(i).status == WAIT) {
+            strcpy(status, WAIT_FLAG);
+        } else {
+            strcpy(status, RUN_FLAG);
+        }
+        sprintf(buffer, "[%d] %s (%s, runTime= %lu msec, idleTime= %lu msec):\n", i, taskList.at(i).name, status,
+                taskList.at(i).totalBusyTime, taskList.at(i).totalIdleTime);
+        systemTasks.append(buffer);
+        sprintf(buffer, "\t (tid= %lu)\n", threads[i]);
+        systemTasks.append(buffer);
+        for (auto &reqResource : taskList.at(i).reqResources) {
+            char *saveptr;
+            char *resourceName;
+            int resourcesNeeded;
+            char resourceString[50];
+            strcpy(resourceString, reqResource.c_str());
+            resourceName = strtok_r(resourceString, ":", &saveptr);
+            resourcesNeeded = atoi(strtok_r(nullptr, ":", &saveptr));
+
+            sprintf(buffer, "\t %s: (needed=\t%d, held= 0)\n", resourceName, resourcesNeeded);
+            systemTasks.append(buffer);
+        }
+        sprintf(buffer, "\t (RUN: %d times, WAIT: %lu msec)\n\n", taskList.at(i).timesExecuted,
+                taskList.at(i).totalWaitTime);
+        systemTasks.append(buffer);
+    }
+    return systemTasks;
 }
 
 /**
@@ -75,13 +121,14 @@ uint parseTaskID(const string &taskIDString) {
  * @param arg
  */
 void parseResourceArg(const string &arg) {
+    char *saveptr;
     char nameValuePair[RESOURCE_MAX_LEN];
     int number;
 
     strcpy(nameValuePair, arg.c_str());
 
-    string name(strtok(nameValuePair, ":"));
-    number = atoi(strtok(nullptr, ":"));
+    string name(strtok_r(nameValuePair, ":", &saveptr));
+    number = atoi(strtok_r(nullptr, ":", &saveptr));
 
     resourceMap[name] = number;
 }
@@ -91,18 +138,19 @@ void parseResourceArg(const string &arg) {
  * @param line
  */
 void parseResourcesLine(const string &line) {
-    char* temp;
+    char *temp;
+    char *saveptr;
     char cline[100];
     strcpy(cline, line.c_str());
-    vector<char*> resourceStrings;
+    vector<char *> resourceStrings;
 
     //go to first name:value pair
-    temp = strtok(cline, " ");
-    temp = strtok(nullptr, " ");
+    temp = strtok_r(cline, " ", &saveptr);
+    temp = strtok_r(nullptr, " ", &saveptr);
     //iterate through the rest
     while (temp != nullptr) {
         resourceStrings.push_back(temp);
-        temp = strtok(nullptr, " ");
+        temp = strtok_r(nullptr, " ", &saveptr);
     }
 
     for (auto &resourceString : resourceStrings) {
@@ -115,7 +163,8 @@ void parseResourcesLine(const string &line) {
  * @param line
  */
 void parseTaskLine(const string &line) {
-    char* token;
+    char *saveptr;
+    char *token;
     char cline[100];
     strcpy(cline, line.c_str());
     TASK newTask;
@@ -125,21 +174,21 @@ void parseTaskLine(const string &line) {
     newTask.totalWaitTime = 0;
     newTask.timesExecuted = 0;
 
-    token = strtok(cline, " "); //flag
-    token = strtok(nullptr, " "); //id
+    token = strtok_r(cline, " ", &saveptr); //flag
+    token = strtok_r(nullptr, " ", &saveptr); //id
     strcpy(newTask.name, token);
-    token = strtok(nullptr, " "); //busy
+    token = strtok_r(nullptr, " ", &saveptr); //busy
     newTask.busyTime = atoi(token);
-    token = strtok(nullptr, " "); //idle
+    token = strtok_r(nullptr, " ", &saveptr); //idle
     newTask.idleTime = atoi(token);
 
     // Resource requirements
-    token = strtok(nullptr, " ");
+    token = strtok_r(nullptr, " ", &saveptr);
     newTask.assigned = false;
-    while (token != nullptr){
+    while (token != nullptr) {
         string str(token);
         newTask.reqResources.push_back(str);
-        token = strtok(nullptr, " ");
+        token = strtok_r(nullptr, " ", &saveptr);
     }
 
     //add to task list
@@ -147,14 +196,14 @@ void parseTaskLine(const string &line) {
 }
 
 LINE_TYPES getInputFileLineType(const string &line) {
-    const char* flag;
+    const char *flag;
     if (!line.length() || line[0] == '#' || line[0] == '\r' || line[0] == '\n') {
         return COMMENT_LINE;
     }
 
     //determine what the leading keyword is (i.e. the input file line flag)
     istringstream iss(line);
-    vector<string> items((istream_iterator<string>(iss)), istream_iterator<string>());
+    vector <string> items((istream_iterator<string>(iss)), istream_iterator<string>());
     flag = items.at(0).c_str();
     if (strcmp(flag, RESOURCE_FLAG) == 0) {
         return RESOURCE_LINE;
@@ -167,7 +216,7 @@ LINE_TYPES getInputFileLineType(const string &line) {
 }
 
 void parseInputFileLine(const string &line) {
-    switch(getInputFileLineType(line)) {
+    switch (getInputFileLineType(line)) {
         case TASK_LINE:
             printf("Parsing task...\n");
             parseTaskLine(line);
