@@ -90,7 +90,6 @@ bool checkResourcesAvailable(TASK *task) {
 //        printf("Need %i, %i avail\n", resNumber, resourceMap[resName]);
 
         if (resourceMap[resName] < resNumber) {
-            printf("\n\nNo resource %s", resName);
             return false;
         }
     }
