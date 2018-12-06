@@ -1,17 +1,13 @@
 //Copyright 2018 Ryan Furrer
 #include "parsers.h"
 #include "taskManager.h"
-#include "task.h"
 #include "util.h"
-#include <stdio.h>
 #include <string.h>
-#include <vector>
-#include <time.h>
 #include <sys/times.h>
 
 // GLOBAL VARS
 std::map<std::string, int> resourceMap;
-std::vector <TASK> taskList;
+std::vector<TASK> taskList;
 pthread_t threads[NTASKS];
 //GLOBAL VARS END
 
@@ -121,10 +117,35 @@ void waitForResources(TASK *task) {
     }
 }
 
-void procureResources(TASK *task) { // todo
+int add(int a, int b) {
+    return a + b;
 }
 
-void releaseResources(TASK *task) { // todo
+int sub(int a, int b) {
+    return a - b;
+}
+
+void adjustResources(TASK *task, int (*operation)(int, int)) {
+    for (auto &resourceString : task->reqResources) {
+        char *saveptr;
+        char resource[RESOURCE_MAX_LEN];
+
+        strcpy(resource, resourceString.c_str());
+        char *resName = strtok_r(resource, ":", &saveptr);
+        int resNumber = atoi(strtok_r(nullptr, ":", &saveptr));
+        int currentValue = resourceMap[resName];
+
+        resourceMap[resName] = operation(currentValue, resNumber);
+    }
+}
+
+
+void procureResources(TASK *task) {
+    adjustResources(task, add);
+}
+
+void releaseResources(TASK *task) {
+    adjustResources(task, sub);
 }
 
 
@@ -143,9 +164,9 @@ void doTaskIdle(TASK *task) {
 
 
 void runTask(TASK *task) { // todo
-    uint iterCount = 0;
     clock_t iterStart, iterWait;
     struct tms tmsIterStart, tmsIterWait;
+    uint iterCount = 0;
 
     while (iterCount != ITERATIONS) {
         iterStart = times(&tmsIterStart);
@@ -213,6 +234,7 @@ void waitForTaskTermination() {
 }
 
 int run(CLI_ARGS args) {
+    tms tmsstart;
     ITERATIONS = args.iterations;
 
     if ((_CLK_TCK = sysconf(_SC_CLK_TCK)) < 0) {
@@ -223,7 +245,6 @@ int run(CLI_ARGS args) {
     printf("Trying to read File...\n");
     readInputFile(args.inputFile);
 
-    tms tmsstart;
     START = times(&tmsstart);
 
     printf("Initializing Mutexes...\n");
