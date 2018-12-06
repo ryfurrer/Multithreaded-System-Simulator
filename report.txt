@@ -1,5 +1,7 @@
-﻿Objectives:
-This assignment is intended to give experience in developing multithreaded programs that require thread synchronization and deadlock prevention. My implementation uses mutexes. So, they were the main focus for this assignment.
+Objectives:
+This assignment is intended to give experience in developing multithreaded
+programs that require thread synchronization and deadlock prevention. My 
+implementation uses mutexes. So they were the main focus for this.
 
 
 How to use:
@@ -23,32 +25,40 @@ code separation.
 
 1. main
           - entry point to the program
-
-2. task.h
+2. tash.h
           - contains a struct for a task
-
 3. taskManager
           - runs the simulation
           - contains the program logic
-
 4. util
       - handles mutex initialization, lock, and unlock
       - handles pthread create and join
-
 5. parsers
-    - parses CLI arguments and files into vars
+    - parses CLI argurments and files into vars
     - parses vars into strings
 
+Three variables are global for the program: a resource map containing resource names to amount;
+taskList, an array containing all the tasks from the file; and threads, an array containg all the 
+pthread_ts.
+
+Three mutexes were used for the program. One controlls access to the resource map, a second controlls
+access to tasks' assigned variable and a third controlls access to a task's assigned variable.
+
+The entire input file is read before the timer starts for the run time and threads are created.
+
 Project Status:
-The program properly uses threads that take global resources and prints results as specified in the example. So, the program is complete and adheres to specifications 
+The program properly uses threads that take global resources and prints results as
+specified in the example. So the program is complete and adheres to specifications 
 however due to the nature of the project an exact match was never made to the example output.
 
 If letters are used as the monitor time or as nIter they will be taken as zero.
 
 
 Testing and Results:
-A continuous integration checker was used to ensure that the program always compiled and exited with exit status EXIT_SUCCESS during development.
-The example input was run and loosely compared with example outputs. They roughly matched. The program was run with test files of my creation too.
+A continuous integration checker was used to ensure that the program always compiled and exited 
+with exit status EXIT_SUCCESS during development.
+The example input were ran and loosely compared with example outputs. The program was run with
+test files of my creation too.
 
 
 Acknowledgments:
