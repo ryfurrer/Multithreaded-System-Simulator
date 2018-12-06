@@ -25,21 +25,26 @@ code separation.
 
 1. main
           - entry point to the program
-
 2. tash.h
           - contains a struct for a task
-
 3. taskManager
           - runs the simulation
           - contains the program logic
-
 4. util
       - handles mutex initialization, lock, and unlock
       - handles pthread create and join
-
 5. parsers
     - parses CLI argurments and files into vars
     - parses vars into strings
+
+Three variables are global for the program: a resource map containing resource names to amount;
+taskList, an array containing all the tasks from the file; and threads, an array containg all the 
+pthread_ts.
+
+Three mutexes were used for the program. One controlls access to the resource map, a second controlls
+access to tasks' assigned variable and a third controlls access to a task's assigned variable.
+
+The entire input file is read before the timer starts for the run time and threads are created.
 
 Project Status:
 The program properly uses threads that take global resources and prints results as
