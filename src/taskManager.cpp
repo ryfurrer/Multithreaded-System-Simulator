@@ -44,6 +44,7 @@ void printMonitor() {
             case RUN:
                 runTasks.append(task.name);
                 runTasks.append(" ");
+                break;
             default:
                 idleTasks.append(task.name);
                 idleTasks.append(" ");
