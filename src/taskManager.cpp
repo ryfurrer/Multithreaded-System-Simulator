@@ -27,7 +27,7 @@ pthread_mutex_t monitorMutex;
 
 float getTime() {
     END = times(&tmsend);
-    return (END - START) / (_CLK_TCK * 1000);
+    return (END - START) / (double) _CLK_TCK * 1000;
 }
 
 /**
@@ -169,6 +169,7 @@ int start(CLI_ARGS args) {
 
     printf("Reading File...\n");
     readInputFile(args.inputFile);
+    START = times(&tmsstart);
 
     printf("Initializing Mutexes...\n");
     mutex_init(&threadMutex);
