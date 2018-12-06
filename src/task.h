@@ -2,6 +2,7 @@
 #ifndef TASK_H
 #define TASK_H
 #include <string>
+#include <vector>
 
 #define NTASKS 25
 #define NRES_TYPES 10
