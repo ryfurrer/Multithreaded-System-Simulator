@@ -25,7 +25,7 @@ code separation.
 
 1. main
           - entry point to the program
-2. tash.h
+2. task.h
           - contains a struct for a task
 3. taskManager
           - runs the simulation
