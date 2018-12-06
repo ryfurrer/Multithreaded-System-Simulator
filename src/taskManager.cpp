@@ -176,10 +176,12 @@ void runTask(TASK *task) { // todo
     uint iterCount = 0;
 
     while (iterCount != ITERATIONS) {
+        switchStatus(task, WAIT);
         iterStart = times(&tmsIterStart);
         waitForResources(task);
         iterWait = times(&tmsIterWait);
-        task->totalWaitTime += (iterWait - iterStart) / _CLK_TCK * 1000;
+//        printf("Waited %li\n", (iterWait - iterStart) * 1000 / _CLK_TCK);
+        task->totalWaitTime += (iterWait - iterStart) * 1000 / _CLK_TCK;
 
         switchStatus(task, RUN);
         runTaskIteration(task);
@@ -191,7 +193,6 @@ void runTask(TASK *task) { // todo
         iterCount++;
         printf("task: %s (tid= %lu, iter= %d, time= %.0f msec) \n", task->name, pthread_self(),
                iterCount, getTime());
-        switchStatus(task, WAIT);
     }
 }
 
