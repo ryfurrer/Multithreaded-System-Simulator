@@ -3,4 +3,4 @@ project(a4tasks)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(a4tasks src/*.cpp src/*.h)
+add_executable(a4tasks )

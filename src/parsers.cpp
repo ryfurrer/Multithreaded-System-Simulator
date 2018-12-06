@@ -83,7 +83,7 @@ std::string getFormattedSystemResourceInfo() {
     return systemResources;
 }
 
-std::string getFormattedSystemTaskInfo() {
+std::string getFormattedSystemTaskInfo() {  //TODO: refactor to be clearer
     std::string systemTasks;
     for (unsigned int i = 0; i < taskList.size(); i++) {
         char buffer[1024];

@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     int status = validateArgs(argc, argv);
 
     if (!status) {
-        return start(parseArgs(argc, argv));
+        return run(parseArgs(argc, argv));
     }
 
     return status;

@@ -15,17 +15,18 @@ std::vector <TASK> taskList;
 pthread_t threads[NTASKS];
 //GLOBAL VARS END
 
+uint ITERATIONS = 0;
+
 clock_t START = 0;
 clock_t END;
 long _CLK_TCK = 0;
-
-tms tmsstart, tmsend;
 
 pthread_mutex_t threadMutex;
 pthread_mutex_t iterationMutex;
 pthread_mutex_t monitorMutex;
 
 float getTime() {
+    tms tmsend;
     END = times(&tmsend);
     return (END - START) / (double) _CLK_TCK * 1000;
 }
@@ -53,7 +54,7 @@ void printMonitor() {
         }
     }
 
-    printf("INFO: Monitor: [WAIT] %s\n\t [RUN] %s\n\t [IDLE] %s\n\n", waitTasks.c_str(),
+    printf("Monitor: [WAIT] %s\n\t [RUN] %s\n\t [IDLE] %s\n\n", waitTasks.c_str(),
            runTasks.c_str(), idleTasks.c_str());
 }
 
@@ -72,22 +73,97 @@ void *monitorThread(void *arg) {
 }
 
 /**
- * Checks if all resources for a task are available
- * @param task
- * @return
+ * Returns whether all resources for a task are available
+ * @param task {@code TASK *}
+ * @return {@code bool}
  */
-bool checkResources(TASK *task) {//todo
-    return false;
+bool checkResourcesAvailable(TASK *task) {
+    for (auto &resourceString : task->reqResources) {
+        char *saveptr;
+        char resource[RESOURCE_MAX_LEN];
+
+        strcpy(resource, resourceString.c_str());
+
+        char *resName = strtok_r(resource, ":", &saveptr);
+        int resNumber = atoi(strtok_r(nullptr, ":", &saveptr));
+
+        if (resourceMap[resName] < resNumber) {
+            printf("\n\nNo resource %s", resName);
+            return false;
+        }
+    }
+    return true;
 }
 
-void procureResources(TASK *task) {//todo
+
+/**
+ * Handles switching a task's status with restriction that tasks cannot switch
+ * if the monitor is printing
+ * @param task
+ * @param status
+ */
+void switchStatus(TASK *task, STATUS status) {
+    mutex_lock(&monitorMutex);
+    task->status = status;
+    mutex_unlock(&monitorMutex);
 }
 
-void releaseResources(TASK *task) {//todo
+void waitForResources(TASK *task) {
+    switchStatus(task, WAIT);
+    bool resAvailable = false;
+    while (!resAvailable) {
+        mutex_lock(&iterationMutex);
+        resAvailable = checkResourcesAvailable(task);
+        if (!resAvailable) {
+            mutex_unlock(&iterationMutex);
+            delay(20);
+        }
+    }
+}
+
+void procureResources(TASK *task) { // todo
+}
+
+void releaseResources(TASK *task) { // todo
 }
 
 
-void runTask(uint iterations, TASK *task) {//todo
+void runTaskIteration(TASK *task) {
+    procureResources(task);
+    delay(task->busyTime);
+    task->totalBusyTime += task->busyTime;
+    releaseResources(task);
+    mutex_unlock(&iterationMutex);
+}
+
+void doTaskIdle(TASK *task) {
+    delay(task->idleTime);
+    task->totalIdleTime += task->idleTime;
+}
+
+
+void runTask(TASK *task) { // todo
+    uint iterCount = 0;
+    clock_t iterStart, iterWait;
+    struct tms tmsIterStart, tmsIterWait;
+
+    while (iterCount != ITERATIONS) {
+        iterStart = times(&tmsIterStart);
+        waitForResources(task);
+        iterWait = times(&tmsIterWait);
+        task->totalWaitTime += (iterWait - iterStart) / _CLK_TCK * 1000;
+
+        switchStatus(task, RUN);
+        runTaskIteration(task);
+
+        switchStatus(task, IDLE);
+        doTaskIdle(task);
+
+        task->timesExecuted += 1;
+        iterCount++;
+        printf("task: %s (tid= %lu, iter= %d, time= %.0f msec) \n", task->name, pthread_self(),
+               iterCount, getTime());
+    }
 }
 
 void printTerminationInfo() {
@@ -103,18 +179,17 @@ void printTerminationInfo() {
            "Running time= %.0f msec\n", systemResources.c_str(), systemTasks.c_str(), getTime());
 }
 
-void runIterations(TASK *task) {
-    //TODO
-}
-
 void *task_start_routine(void *arg) {
     threads[(long) arg] = pthread_self();
     for (auto &task : taskList) {
         if (task.assigned) {
             continue;
         }
+//        printf("%s\n", task.name);
         task.assigned = true;
         mutex_unlock(&threadMutex);
+        printf("%s\n", "Thread unlocked");
+        runTask(&task);
         break;
     }
     pthread_exit(nullptr);
@@ -137,14 +212,18 @@ void waitForTaskTermination() {
     }
 }
 
-int start(CLI_ARGS args) {
+int run(CLI_ARGS args) {
+    ITERATIONS = args.iterations;
+
     if ((_CLK_TCK = sysconf(_SC_CLK_TCK)) < 0) {
-        printf("_SC_CLK_TCK is zero.\n");
+        printf("ERROR: getting sysconfig clock tick\n");
         exit(-1);
     }
 
-    printf("Reading File...\n");
+    printf("Trying to read File...\n");
     readInputFile(args.inputFile);
+
+    tms tmsstart;
     START = times(&tmsstart);
 
     printf("Initializing Mutexes...\n");
@@ -158,7 +237,7 @@ int start(CLI_ARGS args) {
     createTaskThreads();
     delay(400); //delay long enough for threads array to be initialized
 
-    printf("Waiting in tasks...\n");
+    printf("Waiting on tasks...\n");
     waitForTaskTermination();
 
     printf("Tasks Finished...\n");

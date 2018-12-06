@@ -14,6 +14,6 @@ extern std::vector <TASK> taskList;
 extern pthread_t threads[NTASKS];
 //GLOBAL VARS END
 
-int start(CLI_ARGS args);
+int run(CLI_ARGS args);
 
 #endif //MULTITHREADED_SYSTEM_SIMULATOR_TASKMANAGER_H

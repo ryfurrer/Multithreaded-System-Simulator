@@ -16,7 +16,7 @@
 #define IDLE_FLAG "IDLE"
 #define WAIT_FLAG "WAIT"
 
-#define RESOURCE_MAX_LEN 32
+#define RESOURCE_MAX_LEN 64
 
 
 using std::string;
