@@ -78,8 +78,7 @@ std::string getFormattedSystemResourceInfo() {
     return systemResources;
 }
 
-char *convertStatus(STATUS tStatus) {
-    char status[20];
+void convertStatus(STATUS tStatus, char *status) {
     if (tStatus == IDLE) {
         strcpy(status, IDLE_FLAG);
     } else if (tStatus == WAIT) {
@@ -87,7 +86,6 @@ char *convertStatus(STATUS tStatus) {
     } else {
         strcpy(status, RUN_FLAG);
     }
-    return status;
 }
 
 /**
@@ -98,7 +96,8 @@ std::string getFormattedSystemTaskInfo() {  //TODO: refactor to be clearer
     std::string systemTasks;
     for (unsigned int i = 0; i < taskList.size(); i++) {
         char buffer[1024];
-        char *status = convertStatus(taskList.at(i).status);
+        char status[RESOURCE_MAX_LEN];
+        convertStatus(taskList.at(i).status, status);
 
         sprintf(buffer, "[%d] %s (%s, runTime= %i msec, idleTime= %i msec):\n", i,
                 taskList.at(i).name, status,
