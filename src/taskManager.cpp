@@ -104,7 +104,7 @@ void switchStatus(TASK *task, STATUS status) {
     mutex_unlock(&monitorMutex);
 }
 
-void waitForResources(TASK *task) {
+void waitForResources(TASK *task) { // todo - fix does not work correctly
     switchStatus(task, WAIT);
     bool resAvailable = false;
     while (!resAvailable) {
