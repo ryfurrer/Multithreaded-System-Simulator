@@ -15,7 +15,7 @@
  * @param delay
  */
 void delay(int delay) {
-    //from lab experiments on eClass
+    //from http://webdocs.cs.ualberta.ca/~c379/F18/379only/raceC.c
     struct timespec interval;
     interval.tv_sec = (long) delay / 1000;
     interval.tv_nsec = (long) ((delay % 1000) * 1000000);
@@ -28,7 +28,7 @@ void delay(int delay) {
  * @param mutex
  */
 void mutex_init(pthread_mutex_t *mutex) {
-    //from lab exercise on eclass
+    //from http://webdocs.cs.ualberta.ca/~c379/F18/379only/raceC.c
     int rval = pthread_mutex_init(mutex, NULL);
     if (rval) {
         fprintf(stderr, "mutex_init: %s\n", strerror(rval));
@@ -42,7 +42,7 @@ void mutex_init(pthread_mutex_t *mutex) {
  * @param mutex
  */
 void mutex_lock(pthread_mutex_t *mutex) {
-    //from lab exercise on eclass
+    //from http://webdocs.cs.ualberta.ca/~c379/F18/379only/raceC.c
     int rval = pthread_mutex_lock(mutex);
     if (rval) {
         fprintf(stderr, "mutex_lock: %s\n", strerror(rval));
@@ -55,7 +55,7 @@ void mutex_lock(pthread_mutex_t *mutex) {
  * @param mutex
  */
 void mutex_unlock(pthread_mutex_t *mutex) {
-    //from lab exercise on eclass
+    //from http://webdocs.cs.ualberta.ca/~c379/F18/379only/raceC.c
     int rval = pthread_mutex_unlock(mutex);
     if (rval) {
         fprintf(stderr, "mutex_unlock: %s\n", strerror(rval));
