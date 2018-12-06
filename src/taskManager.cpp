@@ -86,7 +86,7 @@ bool checkResourcesAvailable(TASK *task) {
 
         char *resName = strtok_r(resource, ":", &saveptr);
         int resNumber = atoi(strtok_r(nullptr, ":", &saveptr));
-        printf("Need %i, %i avail\n", resNumber, resourceMap[resName]);
+//        printf("Need %i, %i avail\n", resNumber, resourceMap[resName]);
 
         if (resourceMap[resName] < resNumber) {
             printf("\n\nNo resource %s", resName);
