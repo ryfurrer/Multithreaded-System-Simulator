@@ -101,12 +101,13 @@ std::string getFormattedSystemTaskInfo() {
         sprintf(buffer, "\t (tid= %lu)\n", threads[i]);
         systemTasks.append(buffer);
         for (auto &reqResource : taskList.at(i).reqResources) {
+            char *saveptr;
             char *resourceName;
             int resourcesNeeded;
             char resourceString[50];
             strcpy(resourceString, reqResource.c_str());
-            resourceName = strtok(resourceString, ":");
-            resourcesNeeded = atoi(strtok(nullptr, ":"));
+            resourceName = strtok_r(resourceString, ":", &saveptr);
+            resourcesNeeded = atoi(strtok_r(nullptr, ":", &saveptr));
 
             sprintf(buffer, "\t %s: (needed=\t%d, held= 0)\n", resourceName, resourcesNeeded);
             systemTasks.append(buffer);
@@ -123,13 +124,14 @@ std::string getFormattedSystemTaskInfo() {
  * @param arg
  */
 void parseResourceArg(const string &arg) {
+    char *saveptr;
     char nameValuePair[RESOURCE_MAX_LEN];
     int number;
 
     strcpy(nameValuePair, arg.c_str());
 
-    string name(strtok(nameValuePair, ":"));
-    number = atoi(strtok(nullptr, ":"));
+    string name(strtok_r(nameValuePair, ":", &saveptr));
+    number = atoi(strtok_r(nullptr, ":", &saveptr));
 
     resourceMap[name] = number;
 }
@@ -140,17 +142,18 @@ void parseResourceArg(const string &arg) {
  */
 void parseResourcesLine(const string &line) {
     char* temp;
+    char *saveptr;
     char cline[100];
     strcpy(cline, line.c_str());
     vector<char*> resourceStrings;
 
     //go to first name:value pair
-    temp = strtok(cline, " ");
-    temp = strtok(nullptr, " ");
+    temp = strtok_r(cline, " ", &saveptr);
+    temp = strtok_r(nullptr, " ", &saveptr);
     //iterate through the rest
     while (temp != nullptr) {
         resourceStrings.push_back(temp);
-        temp = strtok(nullptr, " ");
+        temp = strtok_r(nullptr, " ", &saveptr);
     }
 
     for (auto &resourceString : resourceStrings) {
@@ -163,6 +166,7 @@ void parseResourcesLine(const string &line) {
  * @param line
  */
 void parseTaskLine(const string &line) {
+    char *saveptr;
     char* token;
     char cline[100];
     strcpy(cline, line.c_str());
@@ -173,21 +177,21 @@ void parseTaskLine(const string &line) {
     newTask.totalWaitTime = 0;
     newTask.timesExecuted = 0;
 
-    token = strtok(cline, " "); //flag
-    token = strtok(nullptr, " "); //id
+    token = strtok_r(cline, " ", &saveptr); //flag
+    token = strtok_r(nullptr, " ", &saveptr); //id
     strcpy(newTask.name, token);
-    token = strtok(nullptr, " "); //busy
+    token = strtok_r(nullptr, " ", &saveptr); //busy
     newTask.busyTime = atoi(token);
-    token = strtok(nullptr, " "); //idle
+    token = strtok_r(nullptr, " ", &saveptr); //idle
     newTask.idleTime = atoi(token);
 
     // Resource requirements
-    token = strtok(nullptr, " ");
+    token = strtok_r(nullptr, " ", &saveptr);
     newTask.assigned = false;
     while (token != nullptr){
         string str(token);
         newTask.reqResources.push_back(str);
-        token = strtok(nullptr, " ");
+        token = strtok_r(nullptr, " ", &saveptr);
     }
 
     //add to task list
