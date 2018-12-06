@@ -63,4 +63,5 @@ task t5 50 100 E:1 A:1
 - Each white space between fields is composed of one, or more, space character(s)
 - There is no white space around the `:` field separator
 - This is only the first draft of a two version Assignment
+- `monitorTime` is only guarantee accurate to 10 ms
 
