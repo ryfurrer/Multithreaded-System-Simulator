@@ -88,6 +88,18 @@ void convertStatus(STATUS tStatus, char *status) {
     }
 }
 
+void getFormattedSystemTaskResourceInfo(std::string reqResource, char* buffer) {
+  char *saveptr;
+  char *resourceName;
+  int resourcesNeeded;
+  char resourceString[RESOURCE_MAX_LEN];
+  strcpy(resourceString, reqResource.c_str());
+  resourceName = strtok_r(resourceString, ":", &saveptr);
+  resourcesNeeded = atoi(strtok_r(nullptr, ":", &saveptr));
+  
+  sprintf(buffer, "\t %s: (needed=\t%d, held= 0)\n", resourceName, resourcesNeeded);
+}
+
 /**
  * Makes the termination output for tasks
  * @return
@@ -106,18 +118,13 @@ std::string getFormattedSystemTaskInfo() {  //TODO: refactor to be clearer
 
         sprintf(buffer, "\t (tid= %lu)\n", threads[i]);
         systemTasks.append(buffer);
+        
         for (auto &reqResource : taskList.at(i).reqResources) {
-            char *saveptr;
-            char *resourceName;
-            int resourcesNeeded;
-            char resourceString[RESOURCE_MAX_LEN];
-            strcpy(resourceString, reqResource.c_str());
-            resourceName = strtok_r(resourceString, ":", &saveptr);
-            resourcesNeeded = atoi(strtok_r(nullptr, ":", &saveptr));
-
-            sprintf(buffer, "\t %s: (needed=\t%d, held= 0)\n", resourceName, resourcesNeeded);
-            systemTasks.append(buffer);
+            char resBuffer[1024];
+            getFormattedSystemTaskResourceInfo(reqResource, resBuffer);
+            systemTasks.append(resBuffer);
         }
+        
         sprintf(buffer, "\t (RUN: %d times, WAIT: %lu msec)\n\n", taskList.at(i).timesExecuted,
                 taskList.at(i).totalWaitTime);
         systemTasks.append(buffer);
