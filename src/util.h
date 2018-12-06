@@ -1,6 +1,4 @@
-//
-// Created by ryfur on 2018-11-30.
-//
+//Copyright 2018 Ryan Furrer
 
 #ifndef MULTITHREADED_SYSTEM_SIMULATOR_UTIL_H
 #define MULTITHREADED_SYSTEM_SIMULATOR_UTIL_H

@@ -1,6 +1,4 @@
-//
-// Created by ryfur on 2018-11-30.
-//
+//Copyright 2018 Ryan Furrer
 
 #include <time.h>
 #include <zconf.h>

@@ -1,6 +1,4 @@
-//
-// Created by ryfur on 2018-11-29.
-//
+//Copyright 2018 Ryan Furrer
 
 #ifndef MULTITHREADED_SYSTEM_SIMULATOR_TASKMANAGER_H
 #define MULTITHREADED_SYSTEM_SIMULATOR_TASKMANAGER_H

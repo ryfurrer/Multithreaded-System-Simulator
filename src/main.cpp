@@ -1,4 +1,4 @@
-
+//Copyright 2018 Ryan Furrer
 #include "parsers.h"
 #include "taskManager.h"
 

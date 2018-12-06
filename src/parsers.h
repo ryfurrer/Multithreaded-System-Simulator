@@ -1,4 +1,4 @@
-
+//Copyright 2018 Ryan Furrer
 #ifndef _PARSERS_
 #define _PARSERS_
 

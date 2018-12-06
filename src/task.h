@@ -1,4 +1,4 @@
-
+//Copyright 2018 Ryan Furrer
 #ifndef TASK_H
 #define TASK_H
 #include <string>

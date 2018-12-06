@@ -1,3 +1,4 @@
+//Copyright 2018 Ryan Furrer
 #include "parsers.h"
 #include "util.h"
 #include "task.h"
