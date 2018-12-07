@@ -18,9 +18,12 @@ clock_t END;
 long _CLK_TCK = 0;
 
 pthread_mutex_t threadMutex;
-pthread_mutex_t iterationMutex;
+pthread_mutex_t resourceMapMutex;
 pthread_mutex_t monitorMutex;
 
+/**
+ * Returns the time in milliseconds that have passed since reading the input file.
+ */
 float getTime() {
     tms tmsend;
     END = times(&tmsend);
@@ -55,10 +58,12 @@ void printMonitor() {
            runTasks.c_str(), idleTasks.c_str());
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
+
 /**
- * Prints to screen the status of tasks (WAITING, RUNNING, IDLE) every `interval` milliseconds
+ * Entry point for a monitor thread.
+ * 
+ * Prints to screen the {@code STATUS} of tasks
+ * every `interval` milliseconds.
  * @return
  */
 void *monitorThread(void *arg) {
@@ -69,9 +74,9 @@ void *monitorThread(void *arg) {
         printMonitor();
         mutex_unlock(&monitorMutex);
     }
+    return nullptr;
 }
 
-#pragma clang diagnostic pop
 
 /**
  * Returns whether all resources for a task are available
@@ -87,7 +92,6 @@ bool checkResourcesAvailable(TASK *task) {
 
         char *resName = strtok_r(resource, ":", &saveptr);
         int resNumber = atoi(strtok_r(nullptr, ":", &saveptr));
-//        printf("Need %i, %i avail\n", resNumber, resourceMap[resName]);
 
         if (resourceMap[resName] < resNumber) {
             return false;
@@ -99,7 +103,11 @@ bool checkResourcesAvailable(TASK *task) {
 
 /**
  * Handles switching a task's status with restriction that tasks cannot switch
- * if the monitor is printing
+ * if the monitor is printing.
+ * 
+ * Locks and unlocks the monitor mutex so that task statuses will not change 
+ * while the monitor thread is printing.
+ * 
  * @param task
  * @param status
  */
@@ -109,18 +117,23 @@ void switchStatus(TASK *task, STATUS status) {
     mutex_unlock(&monitorMutex);
 }
 
+/**
+ * Locks the resource map, checks if resources are available for a resource,
+ * and unlocks the map if they are not.
+ */
 void waitForResources(TASK *task) { // todo - fix does not work correctly
     switchStatus(task, WAIT);
     bool resAvailable = false;
     while (!resAvailable) {
-        mutex_lock(&iterationMutex); // resourceMap needs to be consistent across threads
+        mutex_lock(&resourceMapMutex);
         resAvailable = checkResourcesAvailable(task);
-        mutex_unlock(&iterationMutex);
         if (!resAvailable) {
+            mutex_unlock(&resourceMapMutex);
             delay(20);
         }
     }
 }
+
 
 int add(int a, int b) {
     return a + b;
@@ -130,6 +143,12 @@ int sub(int a, int b) {
     return a - b;
 }
 
+/**
+ * Adjusts the resources used by a task to be 
+ *    =(resourceMapValue (operation) taskResourceValue)
+ * in the resource map
+ * Requires wrapper functions to lock the map mutex
+ */
 void adjustResources(TASK *task, int (*operation)(int, int)) {
     for (auto &resourceString : task->reqResources) {
         char *saveptr;
@@ -144,22 +163,26 @@ void adjustResources(TASK *task, int (*operation)(int, int)) {
     }
 }
 
-
+/**
+ * Removes the resources used by a task from the resource map
+ */
 void procureResources(TASK *task) {
-    mutex_lock(&iterationMutex); // resourceMap needs to be consistent across threads
     adjustResources(task, sub);
-    mutex_unlock(&iterationMutex);
+    mutex_unlock(&resourceMapMutex);
 }
 
+/**
+ * Adds the resources used by a task to the resource map
+ */
 void releaseResources(TASK *task) {
-    mutex_lock(&iterationMutex); // resourceMap needs to be consistent across threads
+    mutex_lock(&resourceMapMutex);
     adjustResources(task, add);
-    mutex_unlock(&iterationMutex);
+    mutex_unlock(&resourceMapMutex);
 }
 
 
 void runTaskIteration(TASK *task) {
-    procureResources(task);
+    procureResources(task); // Note: map mutex gets unlocked here
     delay(task->busyTime);
     task->totalBusyTime += task->busyTime;
     releaseResources(task);
@@ -170,7 +193,9 @@ void doTaskIdle(TASK *task) {
     task->totalIdleTime += task->idleTime;
 }
 
-
+/**
+ * Runs a task ITERATIONS times
+ */
 void runTask(TASK *task) { // todo
     clock_t iterStart, iterWait;
     struct tms tmsIterStart, tmsIterWait;
@@ -181,7 +206,6 @@ void runTask(TASK *task) { // todo
         iterStart = times(&tmsIterStart);
         waitForResources(task);
         iterWait = times(&tmsIterWait);
-//        printf("Waited %li\n", (iterWait - iterStart) * 1000 / _CLK_TCK);
         task->totalWaitTime += (iterWait - iterStart) * 1000 / _CLK_TCK;
 
         switchStatus(task, RUN);
@@ -197,6 +221,9 @@ void runTask(TASK *task) { // todo
     }
 }
 
+/**
+ * Prints out final statistics
+ */
 void printTerminationInfo() {
     std::string systemResources;
     std::string systemTasks;
@@ -210,13 +237,22 @@ void printTerminationInfo() {
            "Running time= %.0f msec\n", systemResources.c_str(), systemTasks.c_str(), getTime());
 }
 
+/**
+ * Entry point for a TASK thread.
+ * 
+ * Gets the first unassigned thread and assigns it to this thread
+ * threads mutex must be locked going into this function as multiple 
+ * threads will be looking at the {@code TASK} assigned value.
+ * 
+ * Unlocks the threads mutex after assignment
+ */
 void *task_start_routine(void *arg) {
     threads[(long) arg] = pthread_self();
     for (auto &task : taskList) {
         if (task.assigned) {
             continue;
         }
-//        printf("%s\n", task.name);
+        
         task.assigned = true;
         mutex_unlock(&threadMutex);
         runTask(&task);
@@ -225,9 +261,11 @@ void *task_start_routine(void *arg) {
     pthread_exit(nullptr);
 }
 
+
 void createMonitorThread(long time) {
     do_pthread_create_with_error_check(&monitorThread, (void *) time);
 }
+
 
 void createTaskThreads() {
     for (unsigned long i = 0; i < taskList.size(); i++) {
@@ -242,6 +280,9 @@ void waitForTaskTermination() {
     }
 }
 
+/**
+ * Runs the multithreaded system simulation
+ */
 int run(CLI_ARGS args) {
     tms tmsstart;
     ITERATIONS = args.iterations;
@@ -258,7 +299,7 @@ int run(CLI_ARGS args) {
 
     printf("Initializing Mutexes...\n");
     mutex_init(&threadMutex);
-    mutex_init(&iterationMutex);
+    mutex_init(&resourceMapMutex);
     mutex_init(&monitorMutex);
 
     printf("Creating monitor thread...\n");

@@ -42,5 +42,4 @@ tar:
 
 clean:
 	rm $(BUILDDIR) -rf
-	rm $(BINARY) -f
 	rm $(target).tar.gz -f
